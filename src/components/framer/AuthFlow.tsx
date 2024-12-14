@@ -1,50 +1,104 @@
-import Image from 'next/image';
-import { motion } from 'framer-motion';
-import { useUser } from '@auth0/nextjs-auth0/client';
+'use client'
 
-export default function AuthFlow() {
-  const { user, isLoading } = useUser();
+import { useUser } from '@auth0/nextjs-auth0/client'
+import { useEffect, useState } from "react"
+import type { ReactNode } from "react"
+import { Button } from "@/components/ui/button"
 
-  if (isLoading) {
+interface AuthFlowProps {
+    buttonText?: string
+    buttonColor?: string
+    redirectUrl?: string
+    showUserProfile?: boolean
+    theme?: "light" | "dark"
+}
+
+export default function AuthFlow(props: AuthFlowProps): ReactNode {
+    const {
+        buttonText = "Sign In",
+        buttonColor = "#0099ff",
+        redirectUrl = "/dashboard",
+        showUserProfile = true,
+        theme = "light",
+    } = props
+
+    const { user, error, isLoading } = useUser()
+    const [mounted, setMounted] = useState(false)
+
+    useEffect(() => {
+        setMounted(true)
+    }, [])
+
+    if (!mounted) return null
+
+    if (isLoading) {
+        return (
+            <div className={`flex items-center justify-center h-full w-full ${
+                theme === "dark" ? "bg-gray-800 text-white" : "bg-gray-50 text-gray-900"
+            }`}>
+                <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-current"/>
+            </div>
+        )
+    }
+
+    if (error) {
+        return (
+            <div className={`flex flex-col items-center justify-center h-full w-full p-4 ${
+                theme === "dark" ? "bg-gray-800 text-white" : "bg-gray-50 text-gray-900"
+            }`}>
+                <p className="text-red-500">Error: {error.message}</p>
+            </div>
+        )
+    }
+
+    if (user && showUserProfile) {
+        return (
+            <div className={`flex flex-col space-y-4 p-4 rounded-lg ${
+                theme === "dark" ? "bg-gray-800 text-white" : "bg-gray-50 text-gray-900"
+            }`}>
+                <div className="flex items-center space-x-4">
+                    {user.picture && (
+                        <img 
+                            src={user.picture} 
+                            alt={user.name || "User"} 
+                            className="h-12 w-12 rounded-full"
+                        />
+                    )}
+                    <div>
+                        <h2 className="font-semibold">{user.name}</h2>
+                        <p className="text-sm opacity-70">{user.email}</p>
+                    </div>
+                </div>
+                <a 
+                    href="/api/auth/logout"
+                    className="w-full"
+                >
+                    <Button 
+                        className="w-full"
+                        style={{ backgroundColor: buttonColor }}
+                    >
+                        Sign Out
+                    </Button>
+                </a>
+            </div>
+        )
+    }
+
     return (
-      <div className="flex justify-center items-center h-screen">
-        <motion.div
-          animate={{ rotate: 360 }}
-          transition={{ duration: 1, repeat: Infinity, ease: "linear" }}
-          className="w-8 h-8 border-4 border-blue-500 rounded-full border-t-transparent"
-        />
-      </div>
-    );
-  }
-
-  return (
-    <div className="flex flex-col items-center space-y-4">
-      {user && user.picture && (
-        <div className="relative w-16 h-16 rounded-full overflow-hidden">
-          <Image
-            src={user.picture}
-            alt="Profile picture"
-            fill
-            sizes="(max-width: 64px) 100vw, 64px"
-            className="object-cover"
-            priority
-          />
+        <div className={`flex items-center justify-center p-4 ${
+            theme === "dark" ? "bg-gray-800" : "bg-gray-50"
+        }`}>
+            <a 
+                href={`/api/auth/login?returnTo=${redirectUrl}`}
+                className="w-full"
+            >
+                <Button 
+                    className="w-full"
+                    style={{ backgroundColor: buttonColor }}
+                >
+                    {buttonText}
+                </Button>
+            </a>
         </div>
-      )}
-      <motion.div
-        initial={{ opacity: 0, y: 20 }}
-        animate={{ opacity: 1, y: 0 }}
-        transition={{ duration: 0.5 }}
-      >
-        {user ? (
-          <div className="text-center">
-            <h2 className="text-xl font-bold">Welcome, {user.name}</h2>
-            <p className="text-gray-600">{user.email}</p>
-          </div>
-        ) : (
-          <p>Please log in to continue</p>
-        )}
-      </motion.div>
-    </div>
-  );
+    )
 }

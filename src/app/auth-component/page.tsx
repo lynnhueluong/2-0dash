@@ -1,19 +1,19 @@
-import { getSession } from '@auth0/nextjs-auth0'
-import { redirect } from 'next/navigation'
+'use client'
 
-export default async function AuthComponent() {
-  const session = await getSession()
+import FramerAuthFlow from '@/components/framer/AuthFlow'
 
-  if (!session) {
-    redirect('/api/auth/login')
-  }
-
+export default function AuthComponent() {
   return (
-    <div className="p-4">
-      <h1 className="text-2xl font-bold">Protected Content</h1>
-      <p className="mt-2">
-        You are logged in as: {session.user.email}
-      </p>
+    <div className="min-h-screen flex items-center justify-center">
+      <div className="w-full max-w-md">
+        <FramerAuthFlow 
+          buttonText="Sign in to Third Space"
+          buttonColor="#0099ff"
+          redirectUrl="/dashboard"
+          showUserProfile={true}
+          theme="light"
+        />
+      </div>
     </div>
   )
 }
