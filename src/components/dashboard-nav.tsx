@@ -2,7 +2,7 @@
 
 import { useUser } from '@auth0/nextjs-auth0/client'
 import Link from 'next/link'
-import { Button } from '/Users/lynnluong/2-0dash/src/components/ui/button'
+import { Button } from '@/components/ui/button'
 
 export function DashboardNav() {
   const { user } = useUser()
