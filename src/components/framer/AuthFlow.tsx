@@ -4,6 +4,8 @@ import { useUser } from '@auth0/nextjs-auth0/client'
 import { useEffect, useState } from "react"
 import type { ReactNode } from "react"
 import { Button } from "@/components/ui/button"
+import Image from 'next/image'
+import Link from 'next/link'
 
 interface AuthFlowProps {
     buttonText?: string
@@ -58,10 +60,12 @@ export default function AuthFlow(props: AuthFlowProps): ReactNode {
             }`}>
                 <div className="flex items-center space-x-4">
                     {user.picture && (
-                        <img 
-                            src={user.picture} 
-                            alt={user.name || "User"} 
-                            className="h-12 w-12 rounded-full"
+                        <Image 
+                            src={user.picture}
+                            alt={user.name || "User"}
+                            width={48}
+                            height={48}
+                            className="rounded-full"
                         />
                     )}
                     <div>
@@ -69,7 +73,7 @@ export default function AuthFlow(props: AuthFlowProps): ReactNode {
                         <p className="text-sm opacity-70">{user.email}</p>
                     </div>
                 </div>
-                <a 
+                <Link 
                     href="/api/auth/logout"
                     className="w-full"
                 >
@@ -79,7 +83,7 @@ export default function AuthFlow(props: AuthFlowProps): ReactNode {
                     >
                         Sign Out
                     </Button>
-                </a>
+                </Link>
             </div>
         )
     }
@@ -88,7 +92,7 @@ export default function AuthFlow(props: AuthFlowProps): ReactNode {
         <div className={`flex items-center justify-center p-4 ${
             theme === "dark" ? "bg-gray-800" : "bg-gray-50"
         }`}>
-            <a 
+            <Link 
                 href={`/api/auth/login?returnTo=${redirectUrl}`}
                 className="w-full"
             >
@@ -98,7 +102,7 @@ export default function AuthFlow(props: AuthFlowProps): ReactNode {
                 >
                     {buttonText}
                 </Button>
-            </a>
+            </Link>
         </div>
     )
 }
