@@ -1,6 +1,6 @@
 'use client';
 
-import { useCallback } from 'react';
+import { useCallback, useState } from 'react';
 import { useRouter } from 'next/navigation';
 import Image from 'next/image';
 import { useUser } from '@auth0/nextjs-auth0/client';
@@ -23,17 +23,17 @@ const AuthFlow = ({
 }: AuthFlowProps) => {
   const router = useRouter();
   const { user, isLoading } = useUser();
+  const [error, setError] = useState<string | null>(null);
 
   const handleAuth = useCallback(async () => {
     try {
       if (user) {
         router.push(redirectUrl);
       } else {
-        // Add returnTo parameter for redirect after login
         router.push(`/api/auth/login?returnTo=${redirectUrl}`);
       }
-    } catch (error) {
-      console.error('Authentication error:', error);
+    } catch (err) {
+      setError('Authentication failed. Please try again.');
     }
   }, [user, redirectUrl, router]);
 
@@ -43,6 +43,12 @@ const AuthFlow = ({
 
   return (
     <div className={`w-full max-w-md mx-auto p-6 ${theme === 'dark' ? 'text-white' : 'text-gray-900'}`}>
+      {error && (
+        <div className="mb-4 p-2 text-red-500 text-sm text-center">
+          {error}
+        </div>
+      )}
+      
       {showUserProfile && user ? (
         <div className="mb-6 text-center">
           {user.picture && (
