@@ -1,18 +1,21 @@
 import nextPlugin from '@next/eslint-plugin-next';
 import reactPlugin from 'eslint-plugin-react';
 import hooksPlugin from 'eslint-plugin-react-hooks';
+import globals from 'globals';
 
 /** @type {import('eslint').Linter.FlatConfig[]} */
-export default [
+const config = [
   {
+    languageOptions: {
+      globals: {
+        ...globals.browser,
+        ...globals.node,
+      },
+    },
     plugins: {
       next: nextPlugin,
       react: reactPlugin,
       'react-hooks': hooksPlugin,
-    },
-    env: {
-      browser: true,
-      node: true,
     },
     settings: {
       react: {
@@ -28,3 +31,5 @@ export default [
     },
   },
 ];
+
+export default config;
