@@ -21,11 +21,15 @@ export default [
         sourceType: 'module',
         ecmaFeatures: {
           jsx: true
-        }
+        },
+        project: './tsconfig.json'
       },
       globals: {
         React: 'readonly',
         JSX: 'readonly',
+        HTMLButtonElement: 'readonly',
+        HTMLElement: 'readonly',
+        Element: 'readonly',
         process: 'readonly'
       }
     },
