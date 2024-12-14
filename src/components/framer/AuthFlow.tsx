@@ -30,7 +30,6 @@ const AuthFlow = ({
       if (user) {
         router.push(redirectUrl);
       } else {
-        // Use window.location.href for more reliable redirect
         window.location.href = '/api/auth/login';
       }
     } catch (err) {
@@ -38,64 +37,75 @@ const AuthFlow = ({
     }
   }, [user, redirectUrl, router]);
 
-  if (isLoading) {
-    return (
-      <div className="w-full max-w-md mx-auto p-6">
-        <div className="w-full max-w-md p-8 bg-white rounded-xl shadow-lg">
-          <div className="text-center">Loading...</div>
-        </div>
-      </div>
-    );
-  }
+  const containerContent = () => {
+    if (isLoading) {
+      return <div className="text-center py-4">Loading...</div>;
+    }
 
-  return (
-    <div className={`w-full max-w-md mx-auto p-6 ${theme === 'dark' ? 'text-white' : 'text-gray-900'}`}>
-      <div className="w-full max-w-md p-8 bg-white rounded-xl shadow-lg">
-        <h1 className="text-3xl font-bold text-center mb-8">
-          Third Space for Ambition
-        </h1>
-        <p className="text-center text-gray-600 mb-8">
-          Your career matching platform
-        </p>
-        
-        {error && (
-          <div className="mb-4 p-2 text-red-500 text-sm text-center">
-            {error}
-          </div>
-        )}
-        
-        {showUserProfile && user ? (
-          <div className="mb-6 text-center">
+    if (showUserProfile && user) {
+      return (
+        <div className="w-full text-center">
+          <h1 className="text-3xl font-bold text-center mb-8">
+            Third Space for Ambition
+          </h1>
+          <p className="text-center text-gray-600 mb-8">
+            Your career matching platform
+          </p>
+          
+          <div className="mb-6">
             {user.picture && (
-              <div className="relative w-16 h-16 mx-auto mb-4">
+              <div className="relative w-16 h-16 mx-auto mb-4 overflow-hidden rounded-full">
                 <Image
                   src={user.picture}
                   alt={user.name || 'User'}
-                  className="rounded-full"
+                  className="rounded-full object-cover"
                   fill
                   sizes="(max-width: 64px) 100vw"
                   priority
                 />
               </div>
             )}
-            <h2 className="text-xl font-semibold">{user.name}</h2>
-            <p className="text-sm opacity-75">{user.email}</p>
+            <h2 className="text-xl font-semibold mb-2">{user.name}</h2>
+            <p className="text-sm text-gray-600 mb-4">{user.email}</p>
             <Button
               onClick={() => router.push('/api/auth/logout')}
-              className="mt-4 bg-red-500 hover:bg-red-600 text-white"
+              className="bg-red-500 hover:bg-red-600 text-white px-6 py-2 rounded-lg transition-colors"
             >
               Log Out
             </Button>
           </div>
-        ) : (
-          <Button
-            onClick={handleAuth}
-            className="w-full py-2 px-4 text-white rounded-lg transition-colors"
-            style={{ backgroundColor: buttonColor }}
-          >
-            {buttonText}
-          </Button>
+        </div>
+      );
+    }
+
+    return (
+      <>
+        <h1 className="text-3xl font-bold text-center mb-8">
+          Third Space for Ambition
+        </h1>
+        <p className="text-center text-gray-600 mb-8">
+          Your career matching platform
+        </p>
+        <Button
+          onClick={handleAuth}
+          className="w-full py-2 px-4 text-white rounded-lg transition-colors"
+          style={{ backgroundColor: buttonColor }}
+        >
+          {buttonText}
+        </Button>
+      </>
+    );
+  };
+
+  return (
+    <div className={`w-full max-w-md mx-auto p-6 ${theme === 'dark' ? 'text-white' : 'text-gray-900'}`}>
+      <div className="w-full max-w-md p-8 bg-white rounded-xl shadow-lg">
+        {error && (
+          <div className="mb-4 p-2 text-red-500 text-sm text-center">
+            {error}
+          </div>
         )}
+        {containerContent()}
       </div>
     </div>
   );
