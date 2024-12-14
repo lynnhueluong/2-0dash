@@ -1,7 +1,10 @@
-import { withMiddlewareAuthRequired } from '@auth0/nextjs-auth0/edge'
+// src/middleware.ts
+import { withMiddlewareAuthRequired } from '@auth0/nextjs-auth0/edge';
 
-export default withMiddlewareAuthRequired()
+export default withMiddlewareAuthRequired({
+  returnTo: '/dashboard'
+});
 
 export const config = {
-  matcher: ['/dashboard/:path*', '/auth-component']
-}
+  matcher: '/dashboard/:path*'
+};
