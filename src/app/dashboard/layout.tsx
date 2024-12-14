@@ -1,4 +1,4 @@
-import { DashboardNav } from '/Users/lynnluong/2-0dash/src/components/dashboard-nav'
+import { DashboardNav } from '../../components/dashboard-nav'
 
 export default function DashboardLayout({
   children,
