@@ -2,6 +2,7 @@
 
 import { useCallback } from 'react';
 import { useRouter } from 'next/navigation';
+import Image from 'next/image';
 import { useUser } from '@auth0/nextjs-auth0/client';
 import { Button } from '@/components/ui/button';
 
@@ -27,10 +28,14 @@ const AuthFlow = ({
     if (user) {
       router.push(redirectUrl);
     } else {
-      // Uses the Next.js Auth0 API route for login
-      window.location.href = '/api/auth/login';
+      // Using router.push instead of window.location
+      router.push('/api/auth/login');
     }
   }, [user, redirectUrl, router]);
+
+  const handleLogout = useCallback(() => {
+    router.push('/api/auth/logout');
+  }, [router]);
 
   if (isLoading) {
     return <div>Loading...</div>;
@@ -41,16 +46,21 @@ const AuthFlow = ({
       {showUserProfile && user ? (
         <div className="mb-6 text-center">
           {user.picture && (
-            <img
-              src={user.picture}
-              alt={user.name || 'User'}
-              className="w-16 h-16 rounded-full mx-auto mb-4"
-            />
+            <div className="relative w-16 h-16 mx-auto mb-4">
+              <Image
+                src={user.picture}
+                alt={user.name || 'User'}
+                className="rounded-full"
+                fill
+                sizes="(max-width: 64px) 100vw"
+                priority
+              />
+            </div>
           )}
           <h2 className="text-xl font-semibold">{user.name}</h2>
           <p className="text-sm opacity-75">{user.email}</p>
           <Button
-            onClick={() => window.location.href = '/api/auth/logout'}
+            onClick={handleLogout}
             className="mt-4 bg-red-500 hover:bg-red-600 text-white"
           >
             Log Out
