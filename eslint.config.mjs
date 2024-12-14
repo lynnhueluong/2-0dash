@@ -22,6 +22,11 @@ export default [
         ecmaFeatures: {
           jsx: true
         }
+      },
+      globals: {
+        React: 'readonly',
+        JSX: 'readonly',
+        process: 'readonly'
       }
     },
     plugins: {
@@ -34,7 +39,8 @@ export default [
         varsIgnorePattern: '^_',
         caughtErrorsIgnorePattern: '^_'
       }],
-      '@next/next/no-img-element': 'error'
+      '@next/next/no-img-element': 'error',
+      'no-undef': 'error'
     }
   }
 ]
