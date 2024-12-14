@@ -1,5 +1,9 @@
-mport React from 'react';
+// src/app/providers.tsx
+'use client';
+
+import React from 'react';
+import { UserProvider } from '@auth0/nextjs-auth0/client';
 
 export function Providers({ children }: { children: React.ReactNode }) {
-  return <>{children}</>;
+  return <UserProvider>{children}</UserProvider>;
 }
