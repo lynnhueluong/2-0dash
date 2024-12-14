@@ -1,108 +1,73 @@
-'use client'
+'use client';
 
-import { useUser } from '@auth0/nextjs-auth0/client'
-import { useEffect, useState } from "react"
-import type { ReactNode } from "react"
-import { Button } from "@/components/ui/button"
-import Image from 'next/image'
-import Link from 'next/link'
+import { useCallback } from 'react';
+import { useRouter } from 'next/navigation';
+import { useUser } from '@auth0/nextjs-auth0/client';
+import { Button } from '@/components/ui/button';
 
 interface AuthFlowProps {
-    buttonText?: string
-    buttonColor?: string
-    redirectUrl?: string
-    showUserProfile?: boolean
-    theme?: "light" | "dark"
+  buttonText: string;
+  buttonColor: string;
+  redirectUrl: string;
+  showUserProfile: boolean;
+  theme: 'light' | 'dark';
 }
 
-export default function AuthFlow(props: AuthFlowProps): ReactNode {
-    const {
-        buttonText = "Sign In",
-        buttonColor = "#0099ff",
-        redirectUrl = "/dashboard",
-        showUserProfile = true,
-        theme = "light",
-    } = props
+const AuthFlow = ({
+  buttonText,
+  buttonColor,
+  redirectUrl,
+  showUserProfile,
+  theme
+}: AuthFlowProps) => {
+  const router = useRouter();
+  const { user, isLoading } = useUser();
 
-    const { user, error, isLoading } = useUser()
-    const [mounted, setMounted] = useState(false)
-
-    useEffect(() => {
-        setMounted(true)
-    }, [])
-
-    if (!mounted) return null
-
-    if (isLoading) {
-        return (
-            <div className={`flex items-center justify-center h-full w-full ${
-                theme === "dark" ? "bg-gray-800 text-white" : "bg-gray-50 text-gray-900"
-            }`}>
-                <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-current"/>
-            </div>
-        )
+  const handleAuth = useCallback(async () => {
+    if (user) {
+      router.push(redirectUrl);
+    } else {
+      // Uses the Next.js Auth0 API route for login
+      window.location.href = '/api/auth/login';
     }
+  }, [user, redirectUrl, router]);
 
-    if (error) {
-        return (
-            <div className={`flex flex-col items-center justify-center h-full w-full p-4 ${
-                theme === "dark" ? "bg-gray-800 text-white" : "bg-gray-50 text-gray-900"
-            }`}>
-                <p className="text-red-500">Error: {error.message}</p>
-            </div>
-        )
-    }
+  if (isLoading) {
+    return <div>Loading...</div>;
+  }
 
-    if (user && showUserProfile) {
-        return (
-            <div className={`flex flex-col space-y-4 p-4 rounded-lg ${
-                theme === "dark" ? "bg-gray-800 text-white" : "bg-gray-50 text-gray-900"
-            }`}>
-                <div className="flex items-center space-x-4">
-                    {user.picture && (
-                        <Image 
-                            src={user.picture}
-                            alt={user.name || "User"}
-                            width={48}
-                            height={48}
-                            className="rounded-full"
-                        />
-                    )}
-                    <div>
-                        <h2 className="font-semibold">{user.name}</h2>
-                        <p className="text-sm opacity-70">{user.email}</p>
-                    </div>
-                </div>
-                <Link 
-                    href="/api/auth/logout"
-                    className="w-full"
-                >
-                    <Button 
-                        className="w-full"
-                        style={{ backgroundColor: buttonColor }}
-                    >
-                        Sign Out
-                    </Button>
-                </Link>
-            </div>
-        )
-    }
-
-    return (
-        <div className={`flex items-center justify-center p-4 ${
-            theme === "dark" ? "bg-gray-800" : "bg-gray-50"
-        }`}>
-            <Link 
-                href={`/api/auth/login?returnTo=${redirectUrl}`}
-                className="w-full"
-            >
-                <Button 
-                    className="w-full"
-                    style={{ backgroundColor: buttonColor }}
-                >
-                    {buttonText}
-                </Button>
-            </Link>
+  return (
+    <div className={`w-full max-w-md mx-auto p-6 ${theme === 'dark' ? 'text-white' : 'text-gray-900'}`}>
+      {showUserProfile && user ? (
+        <div className="mb-6 text-center">
+          {user.picture && (
+            <img
+              src={user.picture}
+              alt={user.name || 'User'}
+              className="w-16 h-16 rounded-full mx-auto mb-4"
+            />
+          )}
+          <h2 className="text-xl font-semibold">{user.name}</h2>
+          <p className="text-sm opacity-75">{user.email}</p>
+          <Button
+            onClick={() => window.location.href = '/api/auth/logout'}
+            className="mt-4 bg-red-500 hover:bg-red-600 text-white"
+          >
+            Log Out
+          </Button>
         </div>
-    )
-}
+      ) : (
+        <Button
+          onClick={handleAuth}
+          className={`w-full py-2 px-4 rounded-lg transition-colors ${
+            buttonColor ? buttonColor : 'bg-blue-600 hover:bg-blue-700 text-white'
+          }`}
+        >
+          {buttonText || 'Get Started'}
+        </Button>
+      )}
+    </div>
+  );
+};
+
+export default AuthFlow;
