@@ -1,69 +1,50 @@
-// src/components/framer/AuthFlow.tsx
-'use client';
+import Image from 'next/image';
+import { motion } from 'framer-motion';
 import { useUser } from '@auth0/nextjs-auth0/client';
-import type { ReactNode } from 'react';
 
-interface AuthFlowProps {
-    buttonText?: string;
-    buttonColor?: string;
-}
+export default function AuthFlow() {
+  const { user, isLoading } = useUser();
 
-export default function AuthFlow(props: AuthFlowProps): ReactNode {
-    const { user, isLoading } = useUser();
-    
-    if (isLoading) return <div>Loading...</div>;
-
+  if (isLoading) {
     return (
-        <div style={{ padding: "20px" }}>
-            {!user ? (
-                <button
-                    onClick={() => window.location.href = '/api/auth/login'}
-                    style={{
-                        padding: "10px 20px",
-                        borderRadius: "6px",
-                        border: "none",
-                        background: props.buttonColor || "#0099ff",
-                        color: "white",
-                        cursor: "pointer",
-                    }}
-                >
-                    {props.buttonText || "Sign In"}
-                </button>
-            ) : (
-                <div
-                    style={{
-                        display: "flex",
-                        flexDirection: "column",
-                        alignItems: "center",
-                        gap: "10px",
-                    }}
-                >
-                    {user.picture && (
-                        <img
-                            src={user.picture}
-                            alt={user.name || "User"}
-                            style={{
-                                width: "50px",
-                                height: "50px",
-                                borderRadius: "50%",
-                            }}
-                        />
-                    )}
-                    <h2 style={{ margin: 0 }}>{user.name}</h2>
-                    <button
-                        onClick={() => window.location.href = '/api/auth/logout'}
-                        style={{
-                            padding: "8px 16px",
-                            borderRadius: "6px",
-                            border: "1px solid #ccc",
-                            background: "white",
-                            cursor: "pointer",
-                        }}
-                    >
-                        Log Out
-                    </button>
-                </div>
-            )}
-        </div>
+      <div className="flex justify-center items-center h-screen">
+        <motion.div
+          animate={{ rotate: 360 }}
+          transition={{ duration: 1, repeat: Infinity, ease: "linear" }}
+          className="w-8 h-8 border-4 border-blue-500 rounded-full border-t-transparent"
+        />
+      </div>
     );
+  }
+
+  return (
+    <div className="flex flex-col items-center space-y-4">
+      {user && user.picture && (
+        <div className="relative w-16 h-16 rounded-full overflow-hidden">
+          <Image
+            src={user.picture}
+            alt="Profile picture"
+            fill
+            sizes="(max-width: 64px) 100vw, 64px"
+            className="object-cover"
+            priority
+          />
+        </div>
+      )}
+      <motion.div
+        initial={{ opacity: 0, y: 20 }}
+        animate={{ opacity: 1, y: 0 }}
+        transition={{ duration: 0.5 }}
+      >
+        {user ? (
+          <div className="text-center">
+            <h2 className="text-xl font-bold">Welcome, {user.name}</h2>
+            <p className="text-gray-600">{user.email}</p>
+          </div>
+        ) : (
+          <p>Please log in to continue</p>
+        )}
+      </motion.div>
+    </div>
+  );
 }
