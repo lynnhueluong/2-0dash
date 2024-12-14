@@ -25,17 +25,17 @@ const AuthFlow = ({
   const { user, isLoading } = useUser();
 
   const handleAuth = useCallback(async () => {
-    if (user) {
-      router.push(redirectUrl);
-    } else {
-      // Using router.push instead of window.location
-      router.push('/api/auth/login');
+    try {
+      if (user) {
+        router.push(redirectUrl);
+      } else {
+        // Add returnTo parameter for redirect after login
+        router.push(`/api/auth/login?returnTo=${redirectUrl}`);
+      }
+    } catch (error) {
+      console.error('Authentication error:', error);
     }
   }, [user, redirectUrl, router]);
-
-  const handleLogout = useCallback(() => {
-    router.push('/api/auth/logout');
-  }, [router]);
 
   if (isLoading) {
     return <div>Loading...</div>;
@@ -60,7 +60,7 @@ const AuthFlow = ({
           <h2 className="text-xl font-semibold">{user.name}</h2>
           <p className="text-sm opacity-75">{user.email}</p>
           <Button
-            onClick={handleLogout}
+            onClick={() => router.push('/api/auth/logout')}
             className="mt-4 bg-red-500 hover:bg-red-600 text-white"
           >
             Log Out
