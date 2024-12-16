@@ -1,10 +1,6 @@
-// app/api/auth/[auth0]/route.ts
-import { NextRequest } from 'next/server';
+// app/api/auth/[...auth0]/route.ts
 import { handleAuth } from '@auth0/nextjs-auth0';
 
-// For App Router, we need to use a simpler approach
-export const GET = async (req: NextRequest) => {
-  return handleAuth()(req);
-};
+export const GET = handleAuth();
 
 export const runtime = 'nodejs';
