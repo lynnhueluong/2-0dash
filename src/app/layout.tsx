@@ -8,8 +8,8 @@ const interTight = Inter_Tight({
 })
 
 export const metadata = {
-  title: 'Third Space for Ambition',
-  description: 'Career matching platform',
+  title: '2.0 Dash',
+  description: 'Login',
 }
 
 export default function RootLayout({
