@@ -1,10 +1,10 @@
 // src/hooks/useAuth.ts
-import { useUser } from '@auth0/nextjs-auth0/client'; // This is all we need for user data
+import { useUser } from '@auth0/nextjs-auth0/client';
 import { useRouter } from 'next/navigation';
 import { useEffect } from 'react';
 
 export const useAuth = () => {
-  const { user, error, isLoading } = useUser(); // useUser from Auth0 handles everything
+  const { user, error, isLoading } = useUser();
   const router = useRouter();
 
   useEffect(() => {
