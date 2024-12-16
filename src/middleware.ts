@@ -6,5 +6,9 @@ export default withMiddlewareAuthRequired({
 });
 
 export const config = {
-  matcher: '/dashboard/:path*'
+  matcher: [
+    '/dashboard/:path*',
+    '/settings/:path*',  
+    '/profile/:path*'
+  ]
 };

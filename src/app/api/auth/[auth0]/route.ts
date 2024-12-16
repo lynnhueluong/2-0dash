@@ -1,12 +1,10 @@
-// pages/api/auth/[...auth0].ts
-import { handleAuth, handleLogin } from '@auth0/nextjs-auth0';
+// app/api/auth/[auth0]/route.ts
+import { NextRequest } from 'next/server';
+import { handleAuth } from '@auth0/nextjs-auth0';
 
-export default handleAuth({
-  login: handleLogin({
-    returnTo: '/dashboard',
-    authorizationParams: {
-      // Add any additional parameters you want to pass to Auth0
-      prompt: 'login',
-    }
-  })
-});
+// For App Router, we need to use a simpler approach
+export const GET = async (req: NextRequest) => {
+  return handleAuth()(req);
+};
+
+export const runtime = 'nodejs';

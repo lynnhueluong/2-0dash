@@ -1,9 +1,16 @@
-import type { NextConfig } from "next";
+// next.config.ts
+import type { NextConfig } from 'next';
 
-const nextConfig: NextConfig = {
+const config: NextConfig = {
   images: {
-    domains: ['https://framerusercontent.com/images/qnf8lnV37ylwHXqqKGX3lsZSY9c.png'],
+    remotePatterns: [
+      {
+        protocol: 'https',
+        hostname: 'framerusercontent.com',
+        pathname: '/**',
+      },
+    ],
   },
 };
 
-export default nextConfig;
+export default config;
