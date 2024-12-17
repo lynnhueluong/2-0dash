@@ -1,4 +1,4 @@
-import { Providers } from './providers'
+import { UserProvider } from '@auth0/nextjs-auth0/client';
 import './globals.css'
 import { Inter_Tight } from 'next/font/google'
 
@@ -12,16 +12,19 @@ export const metadata = {
   description: 'Login',
 }
 
+
 export default function RootLayout({
   children,
 }: {
-  children: React.ReactNode
+  children: React.ReactNode;
 }) {
   return (
     <html lang="en">
       <body className={interTight.className}>
-        <Providers>{children}</Providers>
+        <UserProvider>
+          {children}
+        </UserProvider>
       </body>
     </html>
-  )
+  );
 }
