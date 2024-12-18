@@ -1,42 +1,43 @@
 import { NextResponse } from 'next/server';
-import type { NextRequest } from 'next/server';
 import { getSession } from '@auth0/nextjs-auth0/edge';
+import type { NextRequest } from 'next/server';
 
 const PUBLIC_PATHS = [
   '/api/auth/login',
   '/api/auth/callback',
   '/api/auth/logout',
+  '/api/auth/me',
   '/',
   '/favicon.ico',
   '/_next',
-  '/images'
+  '/images',
+  '/onboarding'  // Add onboarding to public paths
 ];
 
 export async function middleware(request: NextRequest) {
   const { pathname } = request.nextUrl;
 
-  // Skip middleware for public paths and static files
+  // Allow public paths
   if (PUBLIC_PATHS.some(path => pathname.startsWith(path))) {
     return NextResponse.next();
   }
 
   try {
-    const session = await getSession(request, new NextResponse());
+    const response = new NextResponse();
+    const session = await getSession(request, response);
 
     if (!session?.user) {
       const loginUrl = new URL('/api/auth/login', request.url);
-      // Only set returnTo for valid paths
-      if (!pathname.includes('.html')) {
-        loginUrl.searchParams.set('returnTo', pathname);
-      }
+      loginUrl.searchParams.set('returnTo', pathname);
       return NextResponse.redirect(loginUrl);
     }
 
-    // Check onboarding status
+    // Get user metadata
     const metadata = session.user.app_metadata || {};
     const isOnboarded = Boolean(metadata.onboarded);
 
-    if (!isOnboarded && !pathname.startsWith('/onboarding')) {
+    // If trying to access dashboard but not onboarded, redirect to onboarding
+    if (!isOnboarded && pathname.startsWith('/dashboard')) {
       return NextResponse.redirect(new URL('/onboarding', request.url));
     }
 
@@ -49,7 +50,6 @@ export async function middleware(request: NextRequest) {
 
 export const config = {
   matcher: [
-    // Match all paths except public ones
     '/((?!api/auth|_next/static|_next/image|favicon.ico).*)',
   ],
 };

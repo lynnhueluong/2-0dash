@@ -9,6 +9,14 @@ async function DashboardContent() {
     redirect('/api/auth/login');
   }
 
+  const metadata = session.user.app_metadata || {};
+  
+  // If not onboarded, redirect to onboarding flow
+  if (!metadata.onboarded) {
+    redirect('/onboarding');
+  }
+
+
   return (
     <div className="grid gap-4 md:grid-cols-2 lg:grid-cols-4">
       <div className="rounded-lg border bg-card p-6">
