@@ -16,6 +16,10 @@ const nextConfig = {
     ]
   },
 
+  cookies: {
+    sameSite: 'lax'
+  },
+  
   webpack: (config, { isServer }) => {
     if (!isServer) {
       config.resolve.fallback = {

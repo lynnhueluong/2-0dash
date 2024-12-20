@@ -9,13 +9,12 @@ export const GET = handleAuth({
       screen_hint: 'signup',
     }
   }),
-  // Regular login should be separate from signup
   login: handleLogin({
     returnTo: '/dashboard',
     authorizationParams: {
       prompt: 'login',
     }
-  }),
+  })
 });
 
 export const POST = handleAuth();
