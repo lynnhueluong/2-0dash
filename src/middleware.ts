@@ -24,6 +24,11 @@ export async function middleware(request: NextRequest) {
     const response = new NextResponse();
     const session = await getSession(request, response);
 
+    response.headers.set('Access-Control-Allow-Origin', '*');
+    response.headers.set('Access-Control-Allow-Methods', 'GET, POST, PUT, DELETE, OPTIONS');
+    response.headers.set('Access-Control-Allow-Headers', 'Content-Type, Authorization');
+  
+
     if (!session?.user) {
       console.log('No session found, redirecting to login');
       const loginUrl = new URL('/api/auth/login', request.url);
@@ -60,5 +65,6 @@ export const config = {
   matcher: [
     '/dashboard/:path*',
     '/profile/:path*',
+    '/api/:path*'
   ]
 };
