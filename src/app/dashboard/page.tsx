@@ -1,51 +1,39 @@
-import { Suspense } from 'react';
-import { getSession } from '@auth0/nextjs-auth0';
-import { redirect } from 'next/navigation';
+// src/app/dashboard/page.tsx
+'use client';
 
-async function DashboardContent() {
-  const session = await getSession();
+import { useUser } from '@auth0/nextjs-auth0/client';
 
-  if (!session) {
-    redirect('/api/auth/login');
-  }
+export default function DashboardPage() {
+  const { user, error, isLoading } = useUser();
 
-  const metadata = session.user.app_metadata || {};
-  
-  // If not onboarded, redirect to onboarding flow
-  if (!metadata.onboarded) {
-    redirect('/onboarding');
-  }
-
-
-  return (
-    <div className="grid gap-4 md:grid-cols-2 lg:grid-cols-4">
-      <div className="rounded-lg border bg-card p-6">
-        <h3 className="text-lg font-medium">
-          Welcome {session.user.name || 'User'}
-        </h3>
-        <p className="text-sm text-muted-foreground">
-          Start exploring career opportunities
-        </p>
+  if (isLoading) {
+    return (
+      <div className="flex items-center justify-center min-h-screen">
+        <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-gray-900"></div>
       </div>
-    </div>
-  );
-}
+    );
+  }
 
-export default async function DashboardPage() {
+  if (error) {
+    return (
+      <div className="text-red-500">
+        Error: {error.message}
+      </div>
+    );
+  }
+
+  if (!user) {
+    return (
+      <div className="text-center">
+        Please <a href="/api/auth/login" className="text-blue-500">log in</a>
+      </div>
+    );
+  }
+
   return (
-    <Suspense 
-      fallback={
-        <div className="flex items-center justify-center min-h-screen">
-          <div className="text-center">
-            <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-gray-900 mx-auto"></div>
-            <p className="mt-2">Loading dashboard...</p>
-          </div>
-        </div>
-      }
-    >
-      <main className="container mx-auto p-4">
-        <DashboardContent />
-      </main>
-    </Suspense>
+    <div className="p-4">
+      <h1 className="text-2xl font-bold mb-4">Welcome to Dashboard</h1>
+      <div>Logged in as: {user.email}</div>
+    </div>
   );
 }

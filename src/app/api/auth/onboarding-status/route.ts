@@ -1,21 +1,31 @@
 // src/app/api/auth/onboarding-status/route.ts
+import { NextRequest } from 'next/server';
 import { getSession } from '@auth0/nextjs-auth0';
-import { NextResponse } from 'next/server';
 
-export async function GET() {
+export const dynamic = 'force-dynamic';
+
+export async function GET(req: NextRequest) {
   try {
     const session = await getSession();
     if (!session?.user) {
-      return NextResponse.json({ isAuthenticated: false }, { status: 401 });
+      return new Response(JSON.stringify({ error: 'Not authenticated' }), { 
+        status: 401,
+        headers: { 'Content-Type': 'application/json' }
+      });
     }
 
-    return NextResponse.json({
+    // Rest of your onboarding status check logic
+    return new Response(JSON.stringify({ 
       isAuthenticated: true,
-      isOnboarded: session.user.app_metadata?.onboarded === true,
-      onboardingData: session.user.app_metadata?.onboardingData || null
+      user: session.user 
+    }), {
+      headers: { 'Content-Type': 'application/json' }
     });
+
   } catch (error) {
-    console.error('Error checking onboarding status:', error);
-    return NextResponse.json({ error: 'Internal Server Error' }, { status: 500 });
+    return new Response(JSON.stringify({ error: 'Internal server error' }), {
+      status: 500,
+      headers: { 'Content-Type': 'application/json' }
+    });
   }
 }

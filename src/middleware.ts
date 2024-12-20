@@ -6,12 +6,10 @@ const PUBLIC_PATHS = [
   '/api/auth/login',
   '/api/auth/callback',
   '/api/auth/logout',
-  '/api/auth/me',
   '/',
-  '/favicon.ico',
   '/_next',
   '/images',
-  '/onboarding'  // Add onboarding to public paths
+  '/onboarding'
 ];
 
 export async function middleware(request: NextRequest) {
@@ -27,29 +25,40 @@ export async function middleware(request: NextRequest) {
     const session = await getSession(request, response);
 
     if (!session?.user) {
+      console.log('No session found, redirecting to login');
       const loginUrl = new URL('/api/auth/login', request.url);
       loginUrl.searchParams.set('returnTo', pathname);
       return NextResponse.redirect(loginUrl);
     }
 
-    // Get user metadata
+    // Log session metadata for debugging
+    console.log('Session metadata:', {
+      user_id: session.user.sub,
+      app_metadata: session.user.app_metadata,
+      pathname: pathname
+    });
+
     const metadata = session.user.app_metadata || {};
     const isOnboarded = Boolean(metadata.onboarded);
 
-    // If trying to access dashboard but not onboarded, redirect to onboarding
     if (!isOnboarded && pathname.startsWith('/dashboard')) {
+      console.log('User not onboarded, redirecting to onboarding');
       return NextResponse.redirect(new URL('/onboarding', request.url));
     }
 
     return NextResponse.next();
   } catch (error) {
-    console.error('Middleware error:', error);
+    console.error('Middleware error:', {
+      error: error instanceof Error ? error.message : 'Unknown error',
+      pathname
+    });
     return NextResponse.redirect(new URL('/api/auth/login', request.url));
   }
 }
 
 export const config = {
   matcher: [
-    '/((?!api/auth|_next/static|_next/image|favicon.ico).*)',
-  ],
+    '/dashboard/:path*',
+    '/profile/:path*',
+  ]
 };

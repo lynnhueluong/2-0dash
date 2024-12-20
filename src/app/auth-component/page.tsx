@@ -10,7 +10,7 @@ const AuthPage = () => {
           <AuthFlow
             buttonText="Get Started"
             buttonColor="bg-blue-600"
-            redirectUrl="/dashboard"
+            redirectUrl="/api/auth/callback"
             showUserProfile={true}
             theme="light"
           />

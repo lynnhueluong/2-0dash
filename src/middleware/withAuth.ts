@@ -9,7 +9,7 @@ export async function withAuth(request: NextRequest) {
     const { pathname } = request.nextUrl;
 
     // Public paths that don't require authentication
-    const publicPaths = ['/api/auth/login', '/api/auth/callback', '/api/auth/logout', '/', '/favicon.ico'];
+    const publicPaths = ['/api/auth/login', '/api/auth/callback', '/api/auth/logout', '/'];
     if (publicPaths.includes(pathname)) {
       return NextResponse.next();
     }
