@@ -13,15 +13,14 @@ const base = new Airtable({ apiKey: process.env.AIRTABLE_API_KEY })
     const allowedOrigins = [
       'https://the20.co',
       'https://2-0dash.vercel.app',
-      'https://project-dmklsn3yttooaux1sfgg.framercanvas.com',
       'http://localhost:3000'
     ];
   
     const headers = new Headers({
+      'Access-Control-Allow-Origin': origin && allowedOrigins.includes(origin) ? origin : '',
       'Access-Control-Allow-Methods': 'GET, POST, OPTIONS',
       'Access-Control-Allow-Headers': 'Content-Type, Authorization',
-      'Access-Control-Allow-Credentials': 'true',
-      'Vary': 'Origin'
+      'Access-Control-Allow-Credentials': 'true'
     });
   
     if (origin && allowedOrigins.includes(origin)) {
@@ -44,15 +43,19 @@ const base = new Airtable({ apiKey: process.env.AIRTABLE_API_KEY })
   export async function POST(req: NextRequest) {
     const origin = req.headers.get('origin');
     const headers = getCorsHeaders(origin);
-  
+    
     try {
-      const session = await getSession(req, new NextResponse());
-      if (!session?.user) {
-        return new Response(
-          JSON.stringify({ error: 'Not authenticated' }), 
-          { status: 401, headers }
-        );
-      }
+        const session = await getSession(req, new NextResponse());
+        
+        if (!session?.user) {
+            return new Response(
+                JSON.stringify({ 
+                    error: 'Not authenticated',
+                    redirectUrl: 'https://2-0dash.vercel.app/api/auth/login' 
+                }),
+                { status: 401, headers }
+            );
+        }
   
       const formData = await req.json();
       
@@ -109,10 +112,13 @@ const base = new Airtable({ apiKey: process.env.AIRTABLE_API_KEY })
       );
   
     } catch (error) {
-      console.error('Error processing onboarding:', error);
-      return new Response(
-        JSON.stringify({ error: 'Failed to process onboarding' }), 
-        { status: 500, headers }
-      );
+        console.error('Error:', error);
+        return new Response(
+            JSON.stringify({ 
+                error: 'Server error',
+                redirectUrl: 'https://2-0dash.vercel.app/api/auth/login'
+            }),
+            { status: 500, headers }
+        );
     }
-  }
+}
