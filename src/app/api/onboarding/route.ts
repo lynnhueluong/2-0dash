@@ -75,23 +75,33 @@ const base = new Airtable({ apiKey: process.env.AIRTABLE_API_KEY })
         throw new Error('Failed to update user metadata');
       }
       
-      // Update or create Airtable record
       const records = await base('Member Rolodex Admin').select({
         filterByFormula: `{Email} = '${session.user.email}'`
       }).firstPage();
   
       const recordData = {
-        Name: formData.name,
-        City: formData.city,
-        '10,000-ft view': formData.tenKView,
-        'Career Stage': formData.careerStage,
-        'Career Stage Preference': formData.careerStagePreference,
-        'Bread + Butter': formData.breadAndButter,
-        '& - other things I do': formData.otherSkills,
-        'Current Role': formData.currentRole,
-        'Current Company': formData.currentCompany,
-        'Email': session.user.email
-      };
+        'Name': formData.name, 
+        'City': formData.city,
+        '10,000-ft view': formData.tenKView, 
+        'Career Stage': formData.careerStage, 
+ 
+        ...(formData.careerStagePreference && {
+            'Career Stage Preference': formData.careerStagePreference
+        }),
+        ...(formData.breadAndButter && {
+            'Bread + Butter': formData.breadAndButter
+        }),
+        ...(formData.otherSkills && {
+            '& - other things I do': formData.otherSkills
+        }),
+        ...(formData.currentRole && {
+            'Current Role': formData.currentRole
+        }),
+        ...(formData.currentCompany && {
+            'Current Company': formData.currentCompany
+        })
+    };
+
   
       const record = records.length > 0
         ? await base('Member Rolodex Admin').update([
