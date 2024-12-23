@@ -11,31 +11,31 @@ const base = new Airtable({ apiKey: process.env.AIRTABLE_API_KEY })
 
   function getCorsHeaders(origin: string | null) {
     const allowedOrigins = [
-      'https://the20.co',
-      'https://2-0dash.vercel.app',
-      'http://localhost:3000'
+        'https://the20.co',
+        'https://2-0dash.vercel.app',
+        'http://localhost:3000'
     ];
-  
+
     const headers = new Headers({
-      'Access-Control-Allow-Origin': origin && allowedOrigins.includes(origin) ? origin : '',
-      'Access-Control-Allow-Methods': 'GET, POST, OPTIONS',
-      'Access-Control-Allow-Headers': 'Content-Type, Authorization',
-      'Access-Control-Allow-Credentials': 'true'
+        'Access-Control-Allow-Methods': 'GET, POST, OPTIONS',
+        'Access-Control-Allow-Headers': 'Content-Type, Authorization, Credentials',
+        'Access-Control-Allow-Credentials': 'true',
+        'Access-Control-Max-Age': '86400'
     });
-  
+
     if (origin && allowedOrigins.includes(origin)) {
-      headers.set('Access-Control-Allow-Origin', origin);
+        headers.set('Access-Control-Allow-Origin', origin);
     }
-  
+
     return headers;
-  }
+}
   
   export async function OPTIONS(req: NextRequest) {
     const origin = req.headers.get('origin');
     const headers = getCorsHeaders(origin);
     
     return new Response(null, {
-      status: 204,
+      status: 200,
       headers
     });
   }
