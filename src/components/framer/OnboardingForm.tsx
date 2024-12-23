@@ -81,7 +81,8 @@ export default function OnboardingForm() {
       }
 
 
-\      router.push('/dashboard');
+ 
+      router.push('/dashboard');
 
     } catch (err) {
       setError(err instanceof Error ? err.message : 'Something went wrong');
