@@ -11,7 +11,7 @@ const base = new Airtable({ apiKey: process.env.AIRTABLE_API_KEY })
 
   function getCorsHeaders(origin: string | null) {
     const allowedOrigins = [
-      'https://the20.co',
+      'https://the20.co/onboarding',
       'https://2-0dash.vercel.app',
       'https://project-dmklsn3yttooaux1sfgg.framercanvas.com',
       'http://localhost:3000'
