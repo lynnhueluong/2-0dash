@@ -1,5 +1,4 @@
-// src/app/api/auth/[auth0]/route.ts
-import { handleAuth, handleLogin } from '@auth0/nextjs-auth0';
+import { handleAuth } from '@auth0/nextjs-auth0';
 import { NextRequest, NextResponse } from 'next/server';
 
 const ALLOWED_ORIGINS = [
@@ -32,13 +31,21 @@ export const GET = handleAuth({
     const stateParam = Buffer.from(JSON.stringify(state)).toString('base64');
 
     const authorizationParams = {
+      client_id: process.env.AUTH0_CLIENT_ID,
+      response_type: 'code',
+      redirect_uri: `${process.env.BASE_URL}/api/auth/callback`,
+      scope: 'openid profile email',
       prompt: 'signup',
       screen_hint: 'signup',
       state: stateParam,
     };
 
+    const searchParams = new URLSearchParams(
+      Object.entries(authorizationParams).map(([key, value]) => [key, value as string])
+    );
+
     const response = NextResponse.redirect(
-      new URL(`${process.env.AUTH0_ISSUER_BASE_URL}/authorize?${new URLSearchParams(authorizationParams)}`)
+      new URL(`${process.env.AUTH0_ISSUER_BASE_URL}/authorize?${searchParams}`)
     );
 
     // Add CORS headers to the response
@@ -56,12 +63,20 @@ export const GET = handleAuth({
     const stateParam = Buffer.from(JSON.stringify(state)).toString('base64');
 
     const authorizationParams = {
+      client_id: process.env.AUTH0_CLIENT_ID,
+      response_type: 'code',
+      redirect_uri: `${process.env.BASE_URL}/api/auth/callback`,
+      scope: 'openid profile email',
       prompt: 'login',
       state: stateParam,
     };
 
+    const searchParams = new URLSearchParams(
+      Object.entries(authorizationParams).map(([key, value]) => [key, value as string])
+    );
+
     const response = NextResponse.redirect(
-      new URL(`${process.env.AUTH0_ISSUER_BASE_URL}/authorize?${new URLSearchParams(authorizationParams)}`)
+      new URL(`${process.env.AUTH0_ISSUER_BASE_URL}/authorize?${searchParams}`)
     );
 
     // Add CORS headers to the response
