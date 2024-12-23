@@ -9,10 +9,11 @@ const base = new Airtable({ apiKey: process.env.AIRTABLE_API_KEY })
   .base(process.env.AIRTABLE_BASE_ID!);
 
 
-function getCorsHeaders(origin: string | null) {
+  function getCorsHeaders(origin: string | null) {
     const allowedOrigins = [
       'https://the20.co',
       'https://2-0dash.vercel.app',
+      'https://project-dmklsn3yttooaux1sfgg.framercanvas.com',
       'http://localhost:3000'
     ];
   
