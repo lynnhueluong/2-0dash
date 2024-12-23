@@ -1,3 +1,4 @@
+// middleware.ts
 import { NextResponse } from 'next/server';
 import { withMiddlewareAuthRequired, getSession } from '@auth0/nextjs-auth0/edge';
 import type { NextRequest } from 'next/server';
@@ -9,48 +10,39 @@ const PUBLIC_PATHS = [
   '/',
   '/_next',
   '/images',
+  '/onboarding',
   '/api/auth/onboarding-status',
-  'https://the20.co/onboarding' 
+  'https://the20.co/onboarding'
 ];
-
-const ALLOWED_ORIGINS = [
-  'https://the20.co',
-  'http://localhost:3000',
-  'https://2-0dash.vercel.app'
-];
-
 
 export const middleware = withMiddlewareAuthRequired(
   async function middleware(request: NextRequest) {
     const { pathname } = request.nextUrl;
     const origin = request.headers.get('origin');
 
-    const headers = {
-      'Access-Control-Allow-Credentials': 'true',
-      ...(origin && ALLOWED_ORIGINS.includes(origin) 
-        ? { 'Access-Control-Allow-Origin': origin }
-        : {}),
-      'Access-Control-Allow-Methods': 'GET, POST, OPTIONS',
-      'Access-Control-Allow-Headers': 'Content-Type, Authorization'
-    };
-
+    // Allow CORS preflight requests
     if (request.method === 'OPTIONS') {
-      return new NextResponse(null, { 
-        status: 204,
-        headers 
-      });
+      const response = new NextResponse(null, { status: 204 });
+      response.headers.set('Access-Control-Allow-Origin', '*');
+      response.headers.set('Access-Control-Allow-Methods', 'GET, POST, OPTIONS');
+      response.headers.set('Access-Control-Allow-Headers', 'Content-Type, Authorization');
+      response.headers.set('Access-Control-Max-Age', '86400');
+      return response;
     }
 
+    // Allow public paths
     if (PUBLIC_PATHS.some(path => pathname.startsWith(path))) {
       const response = NextResponse.next();
-      Object.entries(headers).forEach(([key, value]) => {
-        response.headers.set(key, value);
-      });
+      if (pathname.startsWith('/api/')) {
+        response.headers.set('Access-Control-Allow-Origin', '*');
+        response.headers.set('Access-Control-Allow-Methods', 'GET, POST, OPTIONS');
+        response.headers.set('Access-Control-Allow-Headers', 'Content-Type, Authorization');
+      }
       return response;
     }
 
     try {
-      const response = NextResponse.next();
+      const response = new NextResponse();
       const session = await getSession(request, response);
 
       if (!session?.user) {
@@ -59,10 +51,22 @@ export const middleware = withMiddlewareAuthRequired(
         return NextResponse.redirect(loginUrl);
       }
 
-      Object.entries(headers).forEach(([key, value]) => {
-        response.headers.set(key, value);
-      });
-      return response;
+      const metadata = session.user.app_metadata || {};
+      const isOnboarded = Boolean(metadata.onboarded);
+
+      if (!isOnboarded && pathname.startsWith('/dashboard')) {
+        return NextResponse.redirect(new URL('/onboarding', request.url));
+      }
+
+      const nextResponse = NextResponse.next();
+
+      if (pathname.startsWith('/api/')) {
+        nextResponse.headers.set('Access-Control-Allow-Origin', '*');
+        nextResponse.headers.set('Access-Control-Allow-Methods', 'GET, POST, OPTIONS');
+        nextResponse.headers.set('Access-Control-Allow-Headers', 'Content-Type, Authorization');
+      }
+
+      return nextResponse;
 
     } catch (error) {
       console.error('Middleware error:', error);
@@ -73,8 +77,8 @@ export const middleware = withMiddlewareAuthRequired(
 
 export const config = {
   matcher: [
-    '/dashboard/:path*',
-    '/profile/:path*',
+    '/dashboard/:path',
+    '/profile/:path',
     '/api/:path*'
   ]
 };
