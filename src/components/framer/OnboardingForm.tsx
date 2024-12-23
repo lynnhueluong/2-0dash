@@ -1,19 +1,38 @@
 'use client';
 
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
+import { useUser } from '@auth0/nextjs-auth0/client';
 import { Card, CardHeader, CardContent } from 'src/components/ui/card';
 import type { OnboardingFormData } from '@/types/onboarding';
 
 export default function OnboardingForm() {
+  const { user, isLoading } = useUser();
   const [formData, setFormData] = useState<OnboardingFormData>({
-    name: '',
-    email: '',
+    name: user?.name || '',
+    email: user?.email || '',
     city: '',
     tenKView: ''
   });
 
-  const [isLoading, setIsLoading] = useState(false);
+  const [isSubmitting, setIsSubmitting] = useState(false);
   const [error, setError] = useState<string | null>(null);
+
+  useEffect(() => {
+    if (user) {
+      setFormData(prev => ({
+        ...prev,
+        name: user.name || '',
+        email: user.email || ''
+      }));
+    }
+  }, [user]);
+
+  useEffect(() => {
+    if (!isLoading && !user) {
+      window.location.href = '/api/auth/login';
+    }
+  }, [user, isLoading]);
+
 
   const handleInputChange = (field: keyof OnboardingFormData, value: string) => {
     setFormData(prev => ({
@@ -21,23 +40,39 @@ export default function OnboardingForm() {
       [field]: value
     }));
   };
-
   const handleSubmit = async (e: React.FormEvent) => {
-  e.preventDefault();
-  setIsLoading(true);
-  setError(null);
+    e.preventDefault();
+    
+    if (!user) {
+      setError('Please log in first');
+      return;
+    }
 
-  try {
-    const response = await fetch('https://2-0dash.vercel.app/api/auth/onboarding-status', {
-      method: 'POST',
-      headers: {
-        'Content-Type': 'application/json',
-      },
-      credentials: 'include', // Add this line
-      body: JSON.stringify(formData)
-    });
+    setIsSubmitting(true);
+    setError(null);
+
+    try {
+      const response = await fetch('https://2-0dash.vercel.app/api/auth/onboarding-status', {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+        },
+        credentials: 'include',
+        body: JSON.stringify({
+          ...formData,
+          email: user.email
+        })
+      });
 
     if (!response.ok) throw new Error('Submission failed');
+
+    await fetch('/api/update-onboarding', {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+        },
+        body: JSON.stringify({ onboarded: true })
+      });
 
     // Handle successful submission
     window.location.href = '/dashboard';
@@ -45,7 +80,7 @@ export default function OnboardingForm() {
   } catch (err) {
     setError(err instanceof Error ? err.message : 'Something went wrong');
   } finally {
-    setIsLoading(false);
+    setIsSubmitting(false);
   }
 };
 
