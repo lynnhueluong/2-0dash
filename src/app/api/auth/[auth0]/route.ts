@@ -4,14 +4,14 @@ import { NextRequest } from 'next/server';
 
 export const GET = handleAuth({
  signup: handleLogin({
-   returnTo: '/onboarding',
+   returnTo: 'https://the20.co/onboarding',
    authorizationParams: {
      prompt: 'signup',
      screen_hint: 'signup',
    }
  }),
  login: handleLogin({
-   returnTo: '/onboarding',
+   returnTo: 'https://the20.co/onboarding',
    authorizationParams: {
      prompt: 'login',
    }
