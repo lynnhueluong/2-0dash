@@ -23,31 +23,31 @@ export default function OnboardingForm() {
   };
 
   const handleSubmit = async (e: React.FormEvent) => {
-    e.preventDefault();
-    setIsLoading(true);
-    setError(null);
+  e.preventDefault();
+  setIsLoading(true);
+  setError(null);
 
-    try {
-      const response = await fetch('/api/onboarding-status', {
-        method: 'POST',
-        headers: {
-          'Content-Type': 'application/json',
-        },
-        body: JSON.stringify(formData)
-      });
+  try {
+    const response = await fetch('https://2-0dash.vercel.app/api/auth/onboarding-status', {
+      method: 'POST',
+      headers: {
+        'Content-Type': 'application/json',
+      },
+      credentials: 'include', // Add this line
+      body: JSON.stringify(formData)
+    });
 
-      if (!response.ok) throw new Error('Submission failed');
+    if (!response.ok) throw new Error('Submission failed');
 
-      // Handle successful submission
-      // You can redirect to dashboard or show success message
-      window.location.href = '/dashboard';
+    // Handle successful submission
+    window.location.href = '/dashboard';
 
-    } catch (err) {
-      setError(err instanceof Error ? err.message : 'Something went wrong');
-    } finally {
-      setIsLoading(false);
-    }
-  };
+  } catch (err) {
+    setError(err instanceof Error ? err.message : 'Something went wrong');
+  } finally {
+    setIsLoading(false);
+  }
+};
 
   return (
     <Card className="max-w-2xl mx-auto p-4">

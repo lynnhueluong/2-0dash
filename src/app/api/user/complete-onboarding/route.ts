@@ -8,77 +8,57 @@ export const dynamic = 'force-dynamic';
 const base = new Airtable({ apiKey: process.env.AIRTABLE_API_KEY })
   .base(process.env.AIRTABLE_BASE_ID!);
 
+// Function to handle CORS
+function corsResponse(data: any, status = 200) {
+  return new Response(JSON.stringify(data), {
+    status,
+    headers: {
+      'Access-Control-Allow-Origin': '*',
+      'Access-Control-Allow-Methods': 'POST, OPTIONS',
+      'Access-Control-Allow-Headers': 'Content-Type, Authorization',
+      'Content-Type': 'application/json',
+    },
+  });
+}
 
-export async function OPTIONS(request: NextRequest) {
-  return new Response(null, {
-      status: 204,
-      headers: {
-        'Access-Control-Allow-Origin': '*',  // Or your specific Framer domain
-        'Access-Control-Allow-Methods': 'GET, POST, PUT, DELETE, OPTIONS',
-        'Access-Control-Allow-Headers': 'Content-Type, Authorization',
-        'Access-Control-Max-Age': '86400'
-      }
-    });
-  }
+// Handle OPTIONS preflight request
+export async function OPTIONS() {
+  return corsResponse(null, 204);
+}
 
 export async function POST(req: NextRequest) {
-
-  const headers = {
-    'Access-Control-Allow-Origin': '*',  // Or your specific Framer domain
-    'Access-Control-Allow-Methods': 'POST',
-    'Access-Control-Allow-Headers': 'Content-Type, Authorization',
-    'Content-Type': 'application/json'
-  };
-
   try {
-    const session = await getSession();
-    if (!session?.user) {
-      return new Response(JSON.stringify({ error: 'Not authenticated' }), {
-        status: 401,
-        headers: { 'Content-Type': 'application/json' }
-      });
-    }
+    // For testing, temporarily bypass session check
+    // const session = await getSession();
+    // if (!session?.user) {
+    //   return corsResponse({ error: 'Not authenticated' }, 401);
+    // }
 
     const formData = await req.json();
     
-    // First, find the record by email
-    const records = await base('Member Rolodex Admin').select({
-      filterByFormula: `{Email} = '${session.user.email}'`
-    }).firstPage();
-
-    if (records.length === 0) {
-      return new Response(JSON.stringify({ error: 'User record not found' }), {
-        status: 404,
-        headers: { 'Content-Type': 'application/json' }
-      });
-    }
-
-    // Update the existing record
-    const record = await base('Member Rolodex Admin').update([
+    // For testing, create a new record instead of looking up by email
+    const record = await base('Member Rolodex Admin').create([
       {
-        id: records[0].id,
         fields: {
           Name: formData.name,
           City: formData.city,
           '10,000-ft view': formData.tenKView,
-          // Not updating email as it's our identifier
-          // Email: session.user.email,
+          'Career Stage': formData.careerStage,
+          'Career Stage Preference': formData.careerStagePreference,
+          'Bread + Butter': formData.breadAndButter,
+          '& - other things I do': formData.otherSkills,
+          'Current Role': formData.currentRole,
+          'Current Company': formData.currentCompany,
+          // Add a temporary email for testing
+          'Email': 'test@example.com'
         }
       }
     ]);
 
-    return new Response(JSON.stringify({
-      success: true,
-      data: record
-    }), {
-      headers: { 'Content-Type': 'application/json' }
-    });
+    return corsResponse({ success: true, data: record });
 
   } catch (error) {
-    console.error('Error updating record:', error);
-    return new Response(JSON.stringify({ error: 'Failed to update record' }), {
-      status: 500,
-      headers: { 'Content-Type': 'application/json' }
-    });
+    console.error('Error creating record:', error);
+    return corsResponse({ error: 'Failed to create record' }, 500);
   }
 }
