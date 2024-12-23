@@ -16,35 +16,39 @@ const allowedOrigins = [
 ];
 
 function getCorsHeaders(origin: string | null) {
-  const headers = new Headers({
-    'Access-Control-Allow-Methods': 'GET, POST, OPTIONS',
-    'Access-Control-Allow-Headers': 'Content-Type, Authorization',
-    'Access-Control-Max-Age': '86400',
-    'Access-Control-Allow-Credentials': 'true'
-
-  });
-
-  if (origin && allowedOrigins.includes(origin)) {
-    headers.set('Access-Control-Allow-Origin', origin);
-    headers.set('Vary', 'Origin'); 
-  }
-
-  return headers;
-}
-
-export async function OPTIONS(req: NextRequest) {
-  const origin = req.headers.get('origin');
-  const headers = getCorsHeaders(origin);
+    const allowedOrigins = [
+      'https://the20.co',
+      'https://2-0dash.vercel.app',
+      'http://localhost:3000'
+    ];
   
-  return new Response(null, {
-    status: 204,
-    headers
-  });
-}
-
-export async function POST(req: NextRequest) {
-  const origin = req.headers.get('origin');
-  const headers = getCorsHeaders(origin);
+    const headers = new Headers({
+      'Access-Control-Allow-Methods': 'GET, POST, OPTIONS',
+      'Access-Control-Allow-Headers': 'Content-Type, Authorization',
+      'Access-Control-Allow-Credentials': 'true',
+      'Vary': 'Origin'
+    });
+  
+    if (origin && allowedOrigins.includes(origin)) {
+      headers.set('Access-Control-Allow-Origin', origin);
+    }
+  
+    return headers;
+  }
+  
+  export async function OPTIONS(req: NextRequest) {
+    const origin = req.headers.get('origin');
+    const headers = getCorsHeaders(origin);
+    
+    return new Response(null, {
+      status: 204,
+      headers
+    });
+  }
+  
+  export async function POST(req: NextRequest) {
+    const origin = req.headers.get('origin');
+    const headers = getCorsHeaders(origin);
 
   try {
     const session = await getSession(req, new NextResponse());
@@ -58,8 +62,9 @@ export async function POST(req: NextRequest) {
     const formData = await req.json();
     
     // Update Auth0 user metadata
-    const metadataResponse = await fetch(`https://${process.env.AUTH0_DOMAIN}/api/v2/users/${session.user.sub}`, {
-        method: 'PATCH',
+    const metadataResponse = await fetch('https://2-0dash.vercel.app/api/auth/onboarding-status', {
+        method: 'POST',
+        credentials: 'include',
         headers: {
             'Content-Type': 'application/json',
             'Authorization': `Bearer ${process.env.AUTH0_MANAGEMENT_API_TOKEN}`
