@@ -1,4 +1,4 @@
-import { handleAuth, handleLogin } from '@auth0/nextjs-auth0';
+import { handleAuth, handleLogin, handleCallback } from '@auth0/nextjs-auth0';
 
 export const GET = handleAuth({
   signup: handleLogin({
@@ -13,6 +13,9 @@ export const GET = handleAuth({
     authorizationParams: {
       prompt: 'login',
     }
+  }),
+  callback: handleCallback({
+    redirectUri: process.env.AUTH0_BASE_URL + '/api/auth/callback'
   })
 });
 
