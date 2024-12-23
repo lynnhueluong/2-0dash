@@ -20,10 +20,13 @@ function getCorsHeaders(origin: string | null) {
     'Access-Control-Allow-Methods': 'GET, POST, OPTIONS',
     'Access-Control-Allow-Headers': 'Content-Type, Authorization',
     'Access-Control-Max-Age': '86400',
+    'Access-Control-Allow-Credentials': 'true'
+
   });
 
   if (origin && allowedOrigins.includes(origin)) {
     headers.set('Access-Control-Allow-Origin', origin);
+    headers.set('Vary', 'Origin'); 
   }
 
   return headers;
@@ -44,7 +47,7 @@ export async function POST(req: NextRequest) {
   const headers = getCorsHeaders(origin);
 
   try {
-    const session = await getSession();
+    const session = await getSession(req, new NextResponse());
     if (!session?.user) {
       return new Response(
         JSON.stringify({ error: 'Not authenticated' }), 
@@ -56,14 +59,14 @@ export async function POST(req: NextRequest) {
     
     // Update Auth0 user metadata
     const metadataResponse = await fetch(`https://${process.env.AUTH0_DOMAIN}/api/v2/users/${session.user.sub}`, {
-      method: 'PATCH',
-      headers: {
-        'Content-Type': 'application/json',
-        'Authorization': `Bearer ${process.env.AUTH0_MANAGEMENT_API_TOKEN}`
-      },
-      body: JSON.stringify({
-        app_metadata: { onboarded: true }
-      })
+        method: 'PATCH',
+        headers: {
+            'Content-Type': 'application/json',
+            'Authorization': `Bearer ${process.env.AUTH0_MANAGEMENT_API_TOKEN}`
+        },
+        body: JSON.stringify({
+            app_metadata: { onboarded: true }
+        })
     });
 
     if (!metadataResponse.ok) {
