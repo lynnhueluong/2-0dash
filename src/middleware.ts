@@ -13,39 +13,44 @@ const PUBLIC_PATHS = [
   '/api/auth/onboarding-status' 
 ];
 
+const ALLOWED_ORIGINS = [
+  'https://the20.co',
+  'http://localhost:3000',
+  'https://2-0dash.vercel.app'
+];
+
+
 export const middleware = withMiddlewareAuthRequired(
   async function middleware(request: NextRequest) {
     const { pathname } = request.nextUrl;
     const origin = request.headers.get('origin');
 
-    // Allow CORS preflight requests
+    const headers = {
+      'Access-Control-Allow-Credentials': 'true',
+      ...(origin && ALLOWED_ORIGINS.includes(origin) 
+        ? { 'Access-Control-Allow-Origin': origin }
+        : {}),
+      'Access-Control-Allow-Methods': 'GET, POST, OPTIONS',
+      'Access-Control-Allow-Headers': 'Content-Type, Authorization'
+    };
+
     if (request.method === 'OPTIONS') {
-      const response = new NextResponse(null, { status: 204 });
-      
-      response.headers.set('Access-Control-Allow-Origin', '*');
-      response.headers.set('Access-Control-Allow-Methods', 'GET, POST, OPTIONS');
-      response.headers.set('Access-Control-Allow-Headers', 'Content-Type, Authorization');
-      response.headers.set('Access-Control-Max-Age', '86400');
-      
-      return response;
+      return new NextResponse(null, { 
+        status: 204,
+        headers 
+      });
     }
 
-    // Allow public paths
     if (PUBLIC_PATHS.some(path => pathname.startsWith(path))) {
       const response = NextResponse.next();
-      
-      // Add CORS headers for API routes
-      if (pathname.startsWith('/api/')) {
-        response.headers.set('Access-Control-Allow-Origin', '*');
-        response.headers.set('Access-Control-Allow-Methods', 'GET, POST, OPTIONS');
-        response.headers.set('Access-Control-Allow-Headers', 'Content-Type, Authorization');
-      }
-      
+      Object.entries(headers).forEach(([key, value]) => {
+        response.headers.set(key, value);
+      });
       return response;
     }
 
     try {
-      const response = new NextResponse();
+      const response = NextResponse.next();
       const session = await getSession(request, response);
 
       if (!session?.user) {
@@ -54,23 +59,10 @@ export const middleware = withMiddlewareAuthRequired(
         return NextResponse.redirect(loginUrl);
       }
 
-      const metadata = session.user.app_metadata || {};
-      const isOnboarded = Boolean(metadata.onboarded);
-
-      if (!isOnboarded && pathname.startsWith('/dashboard')) {
-        return NextResponse.redirect(new URL('/onboarding', request.url));
-      }
-
-      const nextResponse = NextResponse.next();
-      
-      // Add CORS headers if it's an API route
-      if (pathname.startsWith('/api/')) {
-        nextResponse.headers.set('Access-Control-Allow-Origin', '*');
-        nextResponse.headers.set('Access-Control-Allow-Methods', 'GET, POST, OPTIONS');
-        nextResponse.headers.set('Access-Control-Allow-Headers', 'Content-Type, Authorization');
-      }
-
-      return nextResponse;
+      Object.entries(headers).forEach(([key, value]) => {
+        response.headers.set(key, value);
+      });
+      return response;
 
     } catch (error) {
       console.error('Middleware error:', error);
