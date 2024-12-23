@@ -10,7 +10,6 @@ const PUBLIC_PATHS = [
   '/_next',
   '/images',
   '/onboarding',
-  '/api/auth/onboarding-status',
   'https://the20.co/onboarding'
 ];
 
