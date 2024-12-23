@@ -1,12 +1,9 @@
 // src/app/api/onboarding/route.ts
 import { NextRequest, NextResponse } from 'next/server';
-import { getSession } from '@auth0/nextjs-auth0';
+import { getSession, updateSession } from '@auth0/nextjs-auth0';
 import Airtable from 'airtable';
 
 export const dynamic = 'force-dynamic';
-
-const base = new Airtable({ apiKey: process.env.AIRTABLE_API_KEY })
-  .base(process.env.AIRTABLE_BASE_ID!);
 
 const ALLOWED_ORIGINS = [
   'https://the20.co',
@@ -14,136 +11,95 @@ const ALLOWED_ORIGINS = [
   'http://localhost:3000'
 ];
 
+const base = new Airtable({ apiKey: process.env.AIRTABLE_API_KEY })
+  .base(process.env.AIRTABLE_BASE_ID!);
+
 function getCorsHeaders(origin: string | null) {
-    const headers = new Headers({
-        'Access-Control-Allow-Methods': 'GET, POST, OPTIONS',
-        'Access-Control-Allow-Headers': 'Content-Type, Authorization',
-        'Access-Control-Allow-Credentials': 'true',
-        'Access-Control-Max-Age': '86400'
-    });
+  const headers = new Headers({
+    'Access-Control-Allow-Methods': 'GET, POST, OPTIONS',
+    'Access-Control-Allow-Headers': 'Content-Type, Authorization, Origin, X-Requested-With, Accept',
+    'Access-Control-Allow-Credentials': 'true',
+    'Access-Control-Max-Age': '86400', // 24 hours
+  });
 
-    if (origin && ALLOWED_ORIGINS.includes(origin)) {
-        headers.set('Access-Control-Allow-Origin', origin);
+  if (origin && ALLOWED_ORIGINS.includes(origin)) {
+    headers.set('Access-Control-Allow-Origin', origin);
+  }
+
+  return headers;
+}
+
+export async function POST(req: NextRequest) {
+  try {
+    const origin = req.headers.get('origin');
+    const session = await getSession(req, new NextResponse());
+    
+    if (!session?.user) {
+      const response = NextResponse.json(
+        { error: 'Unauthorized' },
+        { status: 401 }
+      );
+      
+      const headers = getCorsHeaders(origin);
+      headers.forEach((value, key) => {
+        response.headers.set(key, value);
+      });
+      
+      return response;
     }
 
-    return headers;
-}
+    const data = await req.json();
+    const { name, city, tenKView, careerStage } = data;
 
-export async function OPTIONS(request: NextRequest) {
-    const origin = request.headers.get('origin');
-    return new NextResponse(null, {
-        status: 204,
-        headers: getCorsHeaders(origin)
+    // Update Airtable record
+    const record = await base('Users').create([
+      {
+        fields: {
+          Name: name,
+          City: city,
+          'Career Stage': careerStage,
+          'Ten K View': tenKView,
+          Email: session.user.email,
+          Auth0ID: session.user.sub,
+        }
+      }
+    ]);
+
+    // Create response with the redirect URL
+    const response = NextResponse.json({
+      success: true,
+      redirectUrl: 'https://2-0dash.vercel.app/dashboard'
     });
-}
 
-export async function POST(request: NextRequest) {
-    const origin = request.headers.get('origin');
+    // Add CORS headers
     const headers = getCorsHeaders(origin);
+    headers.forEach((value, key) => {
+      response.headers.set(key, value);
+    });
 
-    try {
-        const session = await getSession(request, new NextResponse());
-        if (!session?.user) {
-            return NextResponse.json(
-                { 
-                    error: 'Not authenticated',
-                    redirectUrl: '/api/auth/login'
-                },
-                { status: 401, headers }
-            );
-        }
+    return response;
 
-        const formData = await request.json();
+  } catch (error) {
+    console.error('Onboarding Error:', error);
+    
+    const response = NextResponse.json(
+      { error: 'Internal Server Error' },
+      { status: 500 }
+    );
+    
+    const headers = getCorsHeaders(req.headers.get('origin'));
+    headers.forEach((value, key) => {
+      response.headers.set(key, value);
+    });
+    
+    return response;
+  }
+}
 
-        // Validate required fields
-        const requiredFields = ['name', 'city', 'tenKView'];
-        const missingFields = requiredFields.filter(field => !formData[field]);
-        
-        if (missingFields.length > 0) {
-            return NextResponse.json(
-                { error: `Missing required fields: ${missingFields.join(', ')}` },
-                { status: 400, headers }
-            );
-        }
-
-        // Update Auth0 metadata
-        try {
-            const auth0Response = await fetch(
-                `https://${process.env.AUTH0_DOMAIN}/api/v2/users/${session.user.sub}`,
-                {
-                    method: 'PATCH',
-                    headers: {
-                        'Content-Type': 'application/json',
-                        Authorization: `Bearer ${process.env.AUTH0_MANAGEMENT_API_TOKEN}`
-                    },
-                    body: JSON.stringify({
-                        user_metadata: { 
-                            onboarded: true,
-                            city: formData.city,
-                            careerStage: formData.careerStage
-                        }
-                    })
-                }
-            );
-
-            if (!auth0Response.ok) {
-                console.error('Failed to update Auth0 metadata:', await auth0Response.text());
-            }
-        } catch (auth0Error) {
-            console.error('Auth0 metadata update error:', auth0Error);
-        }
-
-        // Update or create Airtable record
-        try {
-            const records = await base('Member Rolodex Admin')
-                .select({
-                    filterByFormula: `{Email} = '${session.user.email}'`
-                })
-                .firstPage();
-
-            const recordData = {
-                'Name': formData.name,
-                'Email': session.user.email,
-                'City': formData.city,
-                '10,000-ft view': formData.tenKView,
-                'Career Stage': formData.careerStage || '',
-                'Last Updated': new Date().toISOString()
-            };
-
-            if (records.length > 0) {
-                await base('Member Rolodex Admin').update([{
-                    id: records[0].id,
-                    fields: recordData
-                }]);
-            } else {
-                await base('Member Rolodex Admin').create([{
-                    fields: recordData
-                }]);
-            }
-        } catch (airtableError) {
-            console.error('Airtable error:', airtableError);
-            return NextResponse.json(
-                { error: 'Failed to update member data' },
-                { status: 500, headers }
-            );
-        }
-
-        return NextResponse.json({
-            success: true,
-            redirectUrl: 'https://2-0dash.vercel.app/dashboard'
-        }, { 
-            status: 200,
-            headers 
-        });
-
-    } catch (error) {
-        console.error('API Error:', error);
-        return NextResponse.json({
-            error: 'Server error processing onboarding',
-            redirectUrl: '/api/auth/login'
-        }, { 
-            status: 500,
-            headers
-        });
-    }
+export async function OPTIONS(req: NextRequest) {
+  const origin = req.headers.get('origin');
+  return new Response(null, {
+    status: 204,
+    headers: getCorsHeaders(origin),
+  });
 }
