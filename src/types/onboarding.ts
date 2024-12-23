@@ -20,3 +20,15 @@ export interface AirtableRecord {
     '10,000-ft view': string;
   };
 }
+
+export interface OnboardingFormData {
+    name: string;
+    email: string;
+    city: string;
+    tenKView: string;
+    careerStage?: string;
+    breadAndButter?: string;
+    otherSkills?: string;
+    currentRole?: string;
+    currentCompany?: string;
+  }

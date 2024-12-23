@@ -1,4 +1,3 @@
-// middleware.ts
 import { NextResponse } from 'next/server';
 import { withMiddlewareAuthRequired, getSession } from '@auth0/nextjs-auth0/edge';
 import type { NextRequest } from 'next/server';
@@ -55,7 +54,7 @@ export const middleware = withMiddlewareAuthRequired(
       const isOnboarded = Boolean(metadata.onboarded);
 
       if (!isOnboarded && pathname.startsWith('/dashboard')) {
-        return NextResponse.redirect(new URL('/onboarding', request.url));
+        return NextResponse.redirect(new URL('https://the20.co/onboarding', request.url));
       }
 
       const nextResponse = NextResponse.next();
