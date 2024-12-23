@@ -14,39 +14,42 @@ const ALLOWED_ORIGINS = [
   'http://localhost:3000'
 ];
 
-function getCorsHeaders() {
-    return {
-        'Access-Control-Allow-Origin': 'https://the20.co',
+function getCorsHeaders(origin: string | null) {
+    const headers = new Headers({
         'Access-Control-Allow-Methods': 'GET, POST, OPTIONS',
         'Access-Control-Allow-Headers': 'Content-Type, Authorization',
-        'Access-Control-Allow-Credentials': 'true'
-    };
+        'Access-Control-Allow-Credentials': 'true',
+        'Access-Control-Max-Age': '86400'
+    });
+
+    if (origin && ALLOWED_ORIGINS.includes(origin)) {
+        headers.set('Access-Control-Allow-Origin', origin);
+    }
+
+    return headers;
 }
 
 export async function OPTIONS(request: NextRequest) {
+    const origin = request.headers.get('origin');
     return new NextResponse(null, {
         status: 204,
-        headers: getCorsHeaders(),
+        headers: getCorsHeaders(origin)
     });
 }
 
 export async function POST(request: NextRequest) {
-    try {
-        // Add CORS headers to the response
-        const response = new NextResponse();
-        const headers = getCorsHeaders();
-        Object.entries(headers).forEach(([key, value]) => {
-            response.headers.set(key, value);
-        });
+    const origin = request.headers.get('origin');
+    const headers = getCorsHeaders(origin);
 
-        const session = await getSession(request, response);
+    try {
+        const session = await getSession(request, new NextResponse());
         if (!session?.user) {
             return NextResponse.json(
                 { 
-                  error: 'Not authenticated',
-                  redirectUrl: '/api/auth/login'
+                    error: 'Not authenticated',
+                    redirectUrl: '/api/auth/login'
                 },
-                { status: 401, headers: getCorsHeaders() }
+                { status: 401, headers }
             );
         }
 
@@ -59,7 +62,7 @@ export async function POST(request: NextRequest) {
         if (missingFields.length > 0) {
             return NextResponse.json(
                 { error: `Missing required fields: ${missingFields.join(', ')}` },
-                { status: 400, headers: getCorsHeaders() }
+                { status: 400, headers }
             );
         }
 
@@ -88,7 +91,6 @@ export async function POST(request: NextRequest) {
             }
         } catch (auth0Error) {
             console.error('Auth0 metadata update error:', auth0Error);
-            // Continue with Airtable update even if Auth0 update fails
         }
 
         // Update or create Airtable record
@@ -122,7 +124,7 @@ export async function POST(request: NextRequest) {
             console.error('Airtable error:', airtableError);
             return NextResponse.json(
                 { error: 'Failed to update member data' },
-                { status: 500, headers: getCorsHeaders() }
+                { status: 500, headers }
             );
         }
 
@@ -131,7 +133,7 @@ export async function POST(request: NextRequest) {
             redirectUrl: 'https://2-0dash.vercel.app/dashboard'
         }, { 
             status: 200,
-            headers: getCorsHeaders()
+            headers 
         });
 
     } catch (error) {
@@ -141,7 +143,7 @@ export async function POST(request: NextRequest) {
             redirectUrl: '/api/auth/login'
         }, { 
             status: 500,
-            headers: getCorsHeaders()
+            headers
         });
     }
 }

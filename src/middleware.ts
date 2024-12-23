@@ -14,29 +14,51 @@ const PUBLIC_PATHS = [
   'https://the20.co/onboarding'
 ];
 
+const ALLOWED_ORIGINS = [
+  'https://the20.co',
+  'https://2-0dash.vercel.app',
+  'http://localhost:3000'
+];
+
+function getCorsHeaders(origin: string | null): Record<string, string> {
+  if (origin && ALLOWED_ORIGINS.includes(origin)) {
+    return {
+      'Access-Control-Allow-Origin': origin,
+      'Access-Control-Allow-Methods': 'GET, POST, OPTIONS',
+      'Access-Control-Allow-Headers': 'Content-Type, Authorization',
+      'Access-Control-Allow-Credentials': 'true',
+      'Access-Control-Max-Age': '86400'
+    };
+  }
+  // Return empty headers object instead of empty object
+  return {
+    'Access-Control-Allow-Methods': 'GET, POST, OPTIONS',
+    'Access-Control-Allow-Headers': 'Content-Type, Authorization',
+    'Access-Control-Allow-Credentials': 'true',
+    'Access-Control-Max-Age': '86400'
+  };
+}
+
 export const middleware = withMiddlewareAuthRequired(
   async function middleware(request: NextRequest) {
     const { pathname } = request.nextUrl;
     const origin = request.headers.get('origin');
+    const corsHeaders = getCorsHeaders(origin);
 
     // Allow CORS preflight requests
     if (request.method === 'OPTIONS') {
-      const response = new NextResponse(null, { status: 204 });
-      response.headers.set('Access-Control-Allow-Origin', '*');
-      response.headers.set('Access-Control-Allow-Methods', 'GET, POST, OPTIONS');
-      response.headers.set('Access-Control-Allow-Headers', 'Content-Type, Authorization');
-      response.headers.set('Access-Control-Max-Age', '86400');
-      return response;
+      return new NextResponse(null, { 
+        status: 204,
+        headers: corsHeaders
+      });
     }
 
     // Allow public paths
     if (PUBLIC_PATHS.some(path => pathname.startsWith(path))) {
       const response = NextResponse.next();
-      if (pathname.startsWith('/api/')) {
-        response.headers.set('Access-Control-Allow-Origin', '*');
-        response.headers.set('Access-Control-Allow-Methods', 'GET, POST, OPTIONS');
-        response.headers.set('Access-Control-Allow-Headers', 'Content-Type, Authorization');
-      }
+      Object.entries(corsHeaders).forEach(([key, value]) => {
+        response.headers.set(key, value);
+      });
       return response;
     }
 
@@ -58,26 +80,31 @@ export const middleware = withMiddlewareAuthRequired(
       }
 
       const nextResponse = NextResponse.next();
-
+      
+      // Add CORS headers to all API responses
       if (pathname.startsWith('/api/')) {
-        nextResponse.headers.set('Access-Control-Allow-Origin', '*');
-        nextResponse.headers.set('Access-Control-Allow-Methods', 'GET, POST, OPTIONS');
-        nextResponse.headers.set('Access-Control-Allow-Headers', 'Content-Type, Authorization');
+        Object.entries(corsHeaders).forEach(([key, value]) => {
+          nextResponse.headers.set(key, value);
+        });
       }
 
       return nextResponse;
 
     } catch (error) {
       console.error('Middleware error:', error);
-      return NextResponse.redirect(new URL('/api/auth/login', request.url));
+      const response = NextResponse.redirect(new URL('/api/auth/login', request.url));
+      Object.entries(corsHeaders).forEach(([key, value]) => {
+        response.headers.set(key, value);
+      });
+      return response;
     }
   }
 );
 
 export const config = {
   matcher: [
-    '/dashboard/:path',
-    '/profile/:path',
+    '/dashboard/:path*',
+    '/profile/:path*',
     '/api/:path*'
   ]
 };
