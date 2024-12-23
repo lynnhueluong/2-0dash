@@ -1,5 +1,5 @@
-// src/app/api/auth/onboarding-status/route.ts
-import { NextRequest } from 'next/server';
+// src/app/api/onboarding/route.ts
+import { NextRequest, NextResponse } from 'next/server';
 import { getSession } from '@auth0/nextjs-auth0';
 import Airtable from 'airtable';
 
@@ -8,11 +8,11 @@ export const dynamic = 'force-dynamic';
 const base = new Airtable({ apiKey: process.env.AIRTABLE_API_KEY })
   .base(process.env.AIRTABLE_BASE_ID!);
 
-// Add your Framer canvas URL here
 const allowedOrigins = [
   'https://project-dmklsn3yttooaux1sfgg.framercanvas.com',
   'http://localhost:3000',
-  'https://2-0dash.vercel.app'
+  'https://2-0dash.vercel.app',
+  'https://the20.co'
 ];
 
 function getCorsHeaders(origin: string | null) {
@@ -22,7 +22,6 @@ function getCorsHeaders(origin: string | null) {
     'Access-Control-Max-Age': '86400',
   });
 
-  // Check if the origin is in our allowed list
   if (origin && allowedOrigins.includes(origin)) {
     headers.set('Access-Control-Allow-Origin', origin);
   }
@@ -30,7 +29,6 @@ function getCorsHeaders(origin: string | null) {
   return headers;
 }
 
-// Handle preflight requests
 export async function OPTIONS(req: NextRequest) {
   const origin = req.headers.get('origin');
   const headers = getCorsHeaders(origin);
@@ -56,35 +54,45 @@ export async function POST(req: NextRequest) {
 
     const formData = await req.json();
     
-    // Find the record by email
+    // Update Auth0 user metadata
+    const metadataResponse = await fetch(`https://${process.env.AUTH0_DOMAIN}/api/v2/users/${session.user.sub}`, {
+      method: 'PATCH',
+      headers: {
+        'Content-Type': 'application/json',
+        'Authorization': `Bearer ${process.env.AUTH0_MANAGEMENT_API_TOKEN}`
+      },
+      body: JSON.stringify({
+        app_metadata: { onboarded: true }
+      })
+    });
+
+    if (!metadataResponse.ok) {
+      throw new Error('Failed to update user metadata');
+    }
+    
+    // Update or create Airtable record
     const records = await base('Member Rolodex Admin').select({
       filterByFormula: `{Email} = '${session.user.email}'`
     }).firstPage();
 
-    if (records.length === 0) {
-      return new Response(
-        JSON.stringify({ error: 'User record not found' }), 
-        { status: 404, headers }
-      );
-    }
+    const recordData = {
+      Name: formData.name,
+      City: formData.city,
+      '10,000-ft view': formData.tenKView,
+      'Career Stage': formData.careerStage,
+      'Career Stage Preference': formData.careerStagePreference,
+      'Bread + Butter': formData.breadAndButter,
+      '& - other things I do': formData.otherSkills,
+      'Current Role': formData.currentRole,
+      'Current Company': formData.currentCompany,
+      'Email': session.user.email
+    };
 
-    // Update the existing record
-    const record = await base('Member Rolodex Admin').update([
-      {
-        id: records[0].id,
-        fields: {
-          Name: formData.name,
-          City: formData.city,
-          '10,000-ft view': formData.tenKView,
-          'Career Stage': formData.careerStage,
-          'Career Stage Preference': formData.careerStagePreference,
-          'Bread + Butter': formData.breadAndButter,
-          '& - other things I do': formData.otherSkills,
-          'Current Role': formData.currentRole,
-          'Current Company': formData.currentCompany
-        }
-      }
-    ]);
+    const record = records.length > 0
+      ? await base('Member Rolodex Admin').update([
+          { id: records[0].id, fields: recordData }
+        ])
+      : await base('Member Rolodex Admin').create([{ fields: recordData }]);
 
     return new Response(
       JSON.stringify({ success: true, data: record }), 
@@ -92,9 +100,9 @@ export async function POST(req: NextRequest) {
     );
 
   } catch (error) {
-    console.error('Error updating record:', error);
+    console.error('Error processing onboarding:', error);
     return new Response(
-      JSON.stringify({ error: 'Failed to update record' }), 
+      JSON.stringify({ error: 'Failed to process onboarding' }), 
       { status: 500, headers }
     );
   }
