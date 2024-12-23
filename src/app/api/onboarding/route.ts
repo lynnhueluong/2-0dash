@@ -49,69 +49,75 @@ function getCorsHeaders(origin: string | null) {
   export async function POST(req: NextRequest) {
     const origin = req.headers.get('origin');
     const headers = getCorsHeaders(origin);
-
-  try {
-    const session = await getSession(req, new NextResponse());
-    if (!session?.user) {
-      return new Response(
-        JSON.stringify({ error: 'Not authenticated' }), 
-        { status: 401, headers }
-      );
-    }
-
-    const formData = await req.json();
-    
-    // Update Auth0 user metadata
-    const metadataResponse = await fetch('https://2-0dash.vercel.app/api/auth/onboarding-status', {
-        method: 'POST',
-        credentials: 'include',
+  
+    try {
+      const session = await getSession(req, new NextResponse());
+      if (!session?.user) {
+        return new Response(
+          JSON.stringify({ error: 'Not authenticated' }), 
+          { status: 401, headers }
+        );
+      }
+  
+      const formData = await req.json();
+      
+      // Update Auth0 user metadata directly
+      const metadataResponse = await fetch(`https://${process.env.AUTH0_DOMAIN}/api/v2/users/${session.user.sub}`, {
+        method: 'PATCH',
         headers: {
-            'Content-Type': 'application/json',
-            'Authorization': `Bearer ${process.env.AUTH0_MANAGEMENT_API_TOKEN}`
+          'Content-Type': 'application/json',
+          'Authorization': `Bearer ${process.env.AUTH0_MANAGEMENT_API_TOKEN}`
         },
         body: JSON.stringify({
-            app_metadata: { onboarded: true }
+          app_metadata: { onboarded: true }
         })
-    });
-
-    if (!metadataResponse.ok) {
-      throw new Error('Failed to update user metadata');
+      });
+  
+      if (!metadataResponse.ok) {
+        throw new Error('Failed to update user metadata');
+      }
+      
+      // Update or create Airtable record
+      const records = await base('Member Rolodex Admin').select({
+        filterByFormula: `{Email} = '${session.user.email}'`
+      }).firstPage();
+  
+      const recordData = {
+        Name: formData.name,
+        City: formData.city,
+        '10,000-ft view': formData.tenKView,
+        'Career Stage': formData.careerStage,
+        'Career Stage Preference': formData.careerStagePreference,
+        'Bread + Butter': formData.breadAndButter,
+        '& - other things I do': formData.otherSkills,
+        'Current Role': formData.currentRole,
+        'Current Company': formData.currentCompany,
+        'Email': session.user.email
+      };
+  
+      const record = records.length > 0
+        ? await base('Member Rolodex Admin').update([
+            { id: records[0].id, fields: recordData }
+          ])
+        : await base('Member Rolodex Admin').create([{ fields: recordData }]);
+  
+      return new Response(
+        JSON.stringify({ 
+          success: true, 
+          data: record,
+          redirectUrl: 'https://the20.co/dashboard' 
+        }), 
+        { 
+          status: 200,
+          headers 
+        }
+      );
+  
+    } catch (error) {
+      console.error('Error processing onboarding:', error);
+      return new Response(
+        JSON.stringify({ error: 'Failed to process onboarding' }), 
+        { status: 500, headers }
+      );
     }
-    
-    // Update or create Airtable record
-    const records = await base('Member Rolodex Admin').select({
-      filterByFormula: `{Email} = '${session.user.email}'`
-    }).firstPage();
-
-    const recordData = {
-      Name: formData.name,
-      City: formData.city,
-      '10,000-ft view': formData.tenKView,
-      'Career Stage': formData.careerStage,
-      'Career Stage Preference': formData.careerStagePreference,
-      'Bread + Butter': formData.breadAndButter,
-      '& - other things I do': formData.otherSkills,
-      'Current Role': formData.currentRole,
-      'Current Company': formData.currentCompany,
-      'Email': session.user.email
-    };
-
-    const record = records.length > 0
-      ? await base('Member Rolodex Admin').update([
-          { id: records[0].id, fields: recordData }
-        ])
-      : await base('Member Rolodex Admin').create([{ fields: recordData }]);
-
-    return new Response(
-      JSON.stringify({ success: true, data: record }), 
-      { headers }
-    );
-
-  } catch (error) {
-    console.error('Error processing onboarding:', error);
-    return new Response(
-      JSON.stringify({ error: 'Failed to process onboarding' }), 
-      { status: 500, headers }
-    );
   }
-}
