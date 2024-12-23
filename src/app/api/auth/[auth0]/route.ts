@@ -1,22 +1,30 @@
-import { handleAuth, handleLogin, handleCallback } from '@auth0/nextjs-auth0';
+// src/app/api/auth/[auth0]/route.ts
+import { handleAuth } from '@auth0/nextjs-auth0';
+import { NextRequest } from 'next/server';
 
 export const GET = handleAuth({
-  signup: handleLogin({
-    returnTo: 'https://the20.co/onboarding',
-    authorizationParams: {
-      prompt: 'signup',
-      screen_hint: 'signup',
+  async callback(req: NextRequest) {
+    const searchParams = req.nextUrl.searchParams;
+    const stateParam = searchParams.get('state');
+    
+    let returnTo = '/dashboard';
+    
+    if (stateParam) {
+      try {
+        const decodedState = JSON.parse(
+          Buffer.from(stateParam, 'base64').toString()
+        );
+        returnTo = decodedState.returnTo || returnTo;
+      } catch (parseError) {
+        console.error('Failed to parse state:', parseError);
+      }
     }
-  }),
-  login: handleLogin({
-    returnTo: 'https://the20.co/onboarding',
-    authorizationParams: {
-      prompt: 'login',
-    }
-  }),
-  callback: handleCallback({
-    redirectUri: process.env.AUTH0_BASE_URL + '/api/auth/callback'
-  })
+
+    // Use the default callback handler
+    return handleAuth().callback(req, {
+      returnTo
+    });
+  }
 });
 
 export const POST = handleAuth();
