@@ -24,16 +24,53 @@ function getCorsHeaders(origin: string | null) {
 }
 
 export const GET = handleAuth({
+  login: async (req: NextRequest) => {
+    const origin = req.headers.get('origin');
+    const redirectTo = 'https://the20.co/onboarding';
+    const state = { redirectTo };
+    const stateParam = Buffer.from(JSON.stringify(state)).toString('base64');
+
+    const baseUrl = process.env.AUTH0_BASE_URL || 'https://2-0dash.vercel.app';
+    const redirectUri = `${baseUrl}/api/auth/callback`;
+
+    const authorizationParams = {
+      client_id: process.env.AUTH0_CLIENT_ID,
+      response_type: 'code',
+      redirect_uri: redirectUri,
+      scope: 'openid profile email',
+      prompt: 'login',
+      state: stateParam,
+    };
+
+    const searchParams = new URLSearchParams(
+      Object.entries(authorizationParams).map(([key, value]) => [key, value as string])
+    );
+
+    const response = NextResponse.redirect(
+      new URL(`${process.env.AUTH0_ISSUER_BASE_URL}/authorize?${searchParams}`)
+    );
+
+    // Add CORS headers to the response
+    const headers = getCorsHeaders(origin);
+    headers.forEach((value, key) => {
+      response.headers.set(key, value);
+    });
+
+    return response;
+  },
   signup: async (req: NextRequest) => {
     const origin = req.headers.get('origin');
     const redirectTo = 'https://the20.co/onboarding';
     const state = { redirectTo };
     const stateParam = Buffer.from(JSON.stringify(state)).toString('base64');
 
+    const baseUrl = process.env.AUTH0_BASE_URL || 'https://2-0dash.vercel.app';
+    const redirectUri = `${baseUrl}/api/auth/callback`;
+
     const authorizationParams = {
       client_id: process.env.AUTH0_CLIENT_ID,
       response_type: 'code',
-      redirect_uri: `${process.env.BASE_URL}/api/auth/callback`,
+      redirect_uri: redirectUri,
       scope: 'openid profile email',
       prompt: 'signup',
       screen_hint: 'signup',
@@ -56,37 +93,8 @@ export const GET = handleAuth({
 
     return response;
   },
-  login: async (req: NextRequest) => {
-    const origin = req.headers.get('origin');
-    const redirectTo = 'https://the20.co/onboarding';
-    const state = { redirectTo };
-    const stateParam = Buffer.from(JSON.stringify(state)).toString('base64');
 
-    const authorizationParams = {
-      client_id: process.env.AUTH0_CLIENT_ID,
-      response_type: 'code',
-      redirect_uri: `${process.env.BASE_URL}/api/auth/callback`,
-      scope: 'openid profile email',
-      prompt: 'login',
-      state: stateParam,
-    };
 
-    const searchParams = new URLSearchParams(
-      Object.entries(authorizationParams).map(([key, value]) => [key, value as string])
-    );
-
-    const response = NextResponse.redirect(
-      new URL(`${process.env.AUTH0_ISSUER_BASE_URL}/authorize?${searchParams}`)
-    );
-
-    // Add CORS headers to the response
-    const headers = getCorsHeaders(origin);
-    headers.forEach((value, key) => {
-      response.headers.set(key, value);
-    });
-
-    return response;
-  },
   callback: async (req: NextRequest) => {
     try {
       const origin = req.headers.get('origin');
