@@ -11,7 +11,7 @@ const base = new Airtable({ apiKey: process.env.AIRTABLE_API_KEY })
 
   function getCorsHeaders(origin: string | null) {
     const allowedOrigins = [
-      'https://the20.co/onboarding',
+      'https://the20.co',
       'https://2-0dash.vercel.app',
       'https://project-dmklsn3yttooaux1sfgg.framercanvas.com',
       'http://localhost:3000'
@@ -100,7 +100,7 @@ const base = new Airtable({ apiKey: process.env.AIRTABLE_API_KEY })
         JSON.stringify({ 
           success: true, 
           data: record,
-          redirectUrl: 'https://the20.co/dashboard' 
+          redirectUrl: 'https://2-0dash.vercel.app/dashboard' 
         }), 
         { 
           status: 200,
