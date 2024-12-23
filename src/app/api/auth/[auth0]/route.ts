@@ -34,13 +34,35 @@ export const GET = handleAuth({
         }
       }
 
-      return NextResponse.redirect(new URL(returnTo));
+      const response = NextResponse.redirect(new URL(returnTo));
+      
+      response.headers.set('Access-Control-Allow-Origin', 'https://the20.co');
+      response.headers.set('Access-Control-Allow-Credentials', 'true');
+      response.headers.set('Access-Control-Allow-Methods', 'GET, POST, OPTIONS');
+      response.headers.set('Access-Control-Allow-Headers', 'Content-Type, Authorization');
+
+      return response;
 
     } catch (error) {
       console.error('Callback Handling Error:', error);
-      return NextResponse.redirect(new URL('/api/auth/login'));
+      const response = NextResponse.redirect(new URL('/api/auth/login'));
+      response.headers.set('Access-Control-Allow-Origin', 'https://the20.co');
+      response.headers.set('Access-Control-Allow-Credentials', 'true');
+      return response;
     }
   }
 });
 
 export const POST = handleAuth();
+
+export async function OPTIONS(req: NextRequest) {
+  return new Response(null, {
+    status: 200,
+    headers: {
+      'Access-Control-Allow-Origin': 'https://the20.co',
+      'Access-Control-Allow-Methods': 'GET, POST, OPTIONS',
+      'Access-Control-Allow-Headers': 'Content-Type, Authorization',
+      'Access-Control-Allow-Credentials': 'true'
+    }
+  });
+}
