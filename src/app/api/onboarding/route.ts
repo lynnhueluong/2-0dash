@@ -7,38 +7,79 @@ export const dynamic = 'force-dynamic';
 const base = new Airtable({ apiKey: process.env.AIRTABLE_API_KEY })
   .base(process.env.AIRTABLE_BASE_ID!);
 
-// Add GET handler
 export async function GET(req: NextRequest) {
-  const session = await getSession(req, new NextResponse());
-  
-  if (!session?.user) {
-    return NextResponse.json({ 
-      error: 'Not authenticated',
-      redirectUrl: 'https://2-0dash.vercel.app/api/auth/login' 
-    }, { status: 401 });
-  }
+  try {
+    const response = new NextResponse();
+    const session = await getSession(req, response);
+    
+    if (!session?.user) {
+      return new NextResponse(
+        JSON.stringify({ 
+          error: 'Not authenticated',
+          redirectUrl: 'https://2-0dash.vercel.app/api/auth/login' 
+        }), 
+        { 
+          status: 401,
+          headers: {
+            'Access-Control-Allow-Origin': '*' ,
+            'Access-Control-Allow-Credentials': 'true',
+            'Content-Type': 'application/json'
+          }
+        }
+      );
+    }
 
-  return NextResponse.json({ 
-    success: true,
-    user: session.user
-  });
+    return new NextResponse(
+      JSON.stringify({ 
+        success: true,
+        user: session.user
+      }), 
+      {
+        headers: {
+          'Access-Control-Allow-Origin': '*' ,
+          'Access-Control-Allow-Credentials': 'true',
+          'Content-Type': 'application/json'
+        }
+      }
+    );
+  } catch (error) {
+    return new NextResponse(
+      JSON.stringify({ 
+        error: 'Session error',
+        redirectUrl: 'https://2-0dash.vercel.app/api/auth/login' 
+      }), 
+      { 
+        status: 500,
+        headers: {
+          'Access-Control-Allow-Origin': '*' ,
+          'Access-Control-Allow-Credentials': 'true',
+          'Content-Type': 'application/json'
+        }
+      }
+    );
+  }
 }
 
 export async function POST(req: NextRequest) {
   try {
-    const session = await getSession(req, new NextResponse());
+    const response = new NextResponse();
+    const session = await getSession(req, response);
     
     if (!session?.user) {
-        return NextResponse.json({
+      return new NextResponse(
+        JSON.stringify({
           error: 'Not authenticated',
           redirectUrl: 'https://2-0dash.vercel.app/api/auth/login'
-        }, { 
+        }), 
+        { 
           status: 401,
           headers: {
-            'Access-Control-Allow-Origin': 'https://the20.co',
-            'Access-Control-Allow-Credentials': 'true'
+            'Access-Control-Allow-Origin': '*' ,
+            'Access-Control-Allow-Credentials': 'true',
+            'Content-Type': 'application/json'
           }
-        });
+        }
+      );
     }
 
     const formData = await req.json();
@@ -98,36 +139,45 @@ export async function POST(req: NextRequest) {
       ]);
     }
 
-    return NextResponse.json({
+    return new NextResponse(
+      JSON.stringify({
         success: true,
         redirectUrl: 'https://2-0dash.vercel.app/dashboard'
-      }, {
+      }),
+      {
         headers: {
           'Access-Control-Allow-Origin': 'https://the20.co',
-          'Access-Control-Allow-Credentials': 'true'
+          'Access-Control-Allow-Credentials': 'true',
+          'Content-Type': 'application/json'
         }
-      });
-    } catch (error: any) {
-      return NextResponse.json({
+      }
+    );
+  } catch (error: any) {
+    return new NextResponse(
+      JSON.stringify({
         error: error.message || 'Server error',
         redirectUrl: 'https://2-0dash.vercel.app/api/auth/login'
-      }, { 
+      }), 
+      { 
         status: 500,
         headers: {
           'Access-Control-Allow-Origin': 'https://the20.co',
-          'Access-Control-Allow-Credentials': 'true'
+          'Access-Control-Allow-Credentials': 'true',
+          'Content-Type': 'application/json'
         }
-      });
-    }
+      }
+    );
+  }
 }
 
-// Add OPTIONS handler for CORS
 export async function OPTIONS(req: NextRequest) {
   return new NextResponse(null, {
     status: 200,
     headers: {
       'Access-Control-Allow-Methods': 'GET, POST, OPTIONS',
       'Access-Control-Allow-Headers': 'Content-Type, Authorization',
+      'Access-Control-Allow-Origin': '*' ,
+      'Access-Control-Allow-Credentials': 'true',
     },
   });
 }

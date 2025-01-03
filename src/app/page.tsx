@@ -1,34 +1,35 @@
 // src/app/page.tsx
 'use client';
 
-import dynamic from 'next/dynamic'
-import { useUser } from '@auth0/nextjs-auth0/client'
-
-const AuthFlow = dynamic(
-  () => import('@/components/framer/AuthFlow'),
-  { ssr: false }
-)
+import { useUser } from '@auth0/nextjs-auth0/client';
+import { useEffect } from 'react';
+import { useRouter } from 'next/navigation';
 
 export default function Home() {
-  const { user, isLoading } = useUser()
+  const { user, isLoading } = useUser();
+  const router = useRouter();
 
-  if (isLoading) {
-    return (
-      <div className="min-h-screen flex items-center justify-center">
-        <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-gray-900"></div>
-      </div>
-    )
-  }
+  useEffect(() => {
+    if (!isLoading && user) {
+      router.push('/dashboard');
+    }
+  }, [user, isLoading, router]);
 
   return (
-    <main className="min-h-screen flex items-center justify-center p-4">
-      <AuthFlow 
-        buttonText="Get Started"
-        buttonColor="#0099ff"
-        redirectUrl="/dashboard"
-        showUserProfile={true}
-        theme="light"
-      />
+    <main className="min-h-screen flex flex-col items-center justify-center p-4 bg-gray-50">
+      {isLoading ? (
+        <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-gray-900" />
+      ) : (
+        <div className="text-center space-y-4">
+          <h1 className="text-4xl font-bold">Welcome</h1>
+          <a
+            href="/api/auth/login"
+            className="inline-block px-6 py-2 bg-blue-600 text-white rounded-md hover:bg-blue-700 transition-colors"
+          >
+            Login
+          </a>
+        </div>
+      )}
     </main>
-  )
+  );
 }
