@@ -1,9 +1,16 @@
 import { UserProvider } from '@auth0/nextjs-auth0/client';
 
-export function Providers({ children }: { children: React.ReactNode }) {
+export default function RootLayout({
+  children,
+}: {
+  children: React.ReactNode;
+}) {
   return (
-    <UserProvider>
-      {children}
-    </UserProvider>
+    <html lang="en">
+      <body suppressHydrationWarning>
+        {children}
+      </body>
+    </html>
   );
 }
+

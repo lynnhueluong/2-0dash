@@ -1,105 +1,133 @@
-// src/app/api/onboarding/route.ts
 import { NextRequest, NextResponse } from 'next/server';
-import { getSession, updateSession } from '@auth0/nextjs-auth0';
+import { getSession } from '@auth0/nextjs-auth0';
 import Airtable from 'airtable';
 
 export const dynamic = 'force-dynamic';
 
-const ALLOWED_ORIGINS = [
-  'https://the20.co',
-  'https://2-0dash.vercel.app',
-  'http://localhost:3000'
-];
-
 const base = new Airtable({ apiKey: process.env.AIRTABLE_API_KEY })
   .base(process.env.AIRTABLE_BASE_ID!);
 
-function getCorsHeaders(origin: string | null) {
-  const headers = new Headers({
-    'Access-Control-Allow-Methods': 'GET, POST, OPTIONS',
-    'Access-Control-Allow-Headers': 'Content-Type, Authorization, Origin, X-Requested-With, Accept',
-    'Access-Control-Allow-Credentials': 'true',
-    'Access-Control-Max-Age': '86400', // 24 hours
-  });
-
-  if (origin && ALLOWED_ORIGINS.includes(origin)) {
-    headers.set('Access-Control-Allow-Origin', origin);
+// Add GET handler
+export async function GET(req: NextRequest) {
+  const session = await getSession(req, new NextResponse());
+  
+  if (!session?.user) {
+    return NextResponse.json({ 
+      error: 'Not authenticated',
+      redirectUrl: 'https://2-0dash.vercel.app/api/auth/login' 
+    }, { status: 401 });
   }
 
-  return headers;
+  return NextResponse.json({ 
+    success: true,
+    user: session.user
+  });
 }
 
 export async function POST(req: NextRequest) {
   try {
-    const origin = req.headers.get('origin');
     const session = await getSession(req, new NextResponse());
     
     if (!session?.user) {
-      const response = NextResponse.json(
-        { error: 'Unauthorized' },
-        { status: 401 }
-      );
-      
-      const headers = getCorsHeaders(origin);
-      headers.forEach((value, key) => {
-        response.headers.set(key, value);
-      });
-      
-      return response;
+        return NextResponse.json({
+          error: 'Not authenticated',
+          redirectUrl: 'https://2-0dash.vercel.app/api/auth/login'
+        }, { 
+          status: 401,
+          headers: {
+            'Access-Control-Allow-Origin': 'https://the20.co',
+            'Access-Control-Allow-Credentials': 'true'
+          }
+        });
     }
 
-    const data = await req.json();
-    const { name, city, tenKView, careerStage } = data;
+    const formData = await req.json();
+    
+    // Update Auth0 user metadata
+    const metadataResponse = await fetch(`https://${process.env.AUTH0_DOMAIN}/api/v2/users/${session.user.sub}`, {
+      method: 'PATCH',
+      headers: {
+        'Content-Type': 'application/json',
+        'Authorization': `Bearer ${process.env.AUTH0_MANAGEMENT_API_TOKEN}`
+      },
+      body: JSON.stringify({
+        app_metadata: { onboarded: true }
+      })
+    });
 
-    // Update Airtable record
-    const record = await base('Users').create([
-      {
-        fields: {
-          Name: name,
-          City: city,
-          'Career Stage': careerStage,
-          'Ten K View': tenKView,
-          Email: session.user.email,
-          Auth0ID: session.user.sub,
+    if (!metadataResponse.ok) {
+      console.error('Metadata update failed:', await metadataResponse.text());
+      throw new Error('Failed to update user metadata');
+    }
+    
+    const records = await base('Member Rolodex Admin').select({
+      filterByFormula: `{Email} = '${session.user.email}'`
+    }).firstPage();
+
+    const recordData = {
+      'Name': formData.name, 
+      'City': formData.city,
+      '10,000-ft view': formData.tenKView, 
+      'Career Stage': formData.careerStage,
+      'Email': session.user.email,
+      ...(formData.careerStagePreference && {
+        'Career Stage Preference': formData.careerStagePreference
+      }),
+      ...(formData.breadAndButter && {
+        'Bread + Butter': formData.breadAndButter
+      }),
+      ...(formData.otherSkills && {
+        '& - other things I do': formData.otherSkills
+      }),
+      ...(formData.currentRole && {
+        'Current Role': formData.currentRole
+      }),
+      ...(formData.currentCompany && {
+        'Current Company': formData.currentCompany
+      })
+    };
+
+    let record;
+    if (records.length > 0) {
+      record = await base('Member Rolodex Admin').update([
+        { id: records[0].id, fields: recordData }
+      ]);
+    } else {
+      record = await base('Member Rolodex Admin').create([
+        { fields: recordData }
+      ]);
+    }
+
+    return NextResponse.json({
+        success: true,
+        redirectUrl: 'https://2-0dash.vercel.app/dashboard'
+      }, {
+        headers: {
+          'Access-Control-Allow-Origin': 'https://the20.co',
+          'Access-Control-Allow-Credentials': 'true'
         }
-      }
-    ]);
-
-    // Create response with the redirect URL
-    const response = NextResponse.json({
-      success: true,
-      redirectUrl: 'https://2-0dash.vercel.app/dashboard'
-    });
-
-    // Add CORS headers
-    const headers = getCorsHeaders(origin);
-    headers.forEach((value, key) => {
-      response.headers.set(key, value);
-    });
-
-    return response;
-
-  } catch (error) {
-    console.error('Onboarding Error:', error);
-    
-    const response = NextResponse.json(
-      { error: 'Internal Server Error' },
-      { status: 500 }
-    );
-    
-    const headers = getCorsHeaders(req.headers.get('origin'));
-    headers.forEach((value, key) => {
-      response.headers.set(key, value);
-    });
-    
-    return response;
-  }
+      });
+    } catch (error: any) {
+      return NextResponse.json({
+        error: error.message || 'Server error',
+        redirectUrl: 'https://2-0dash.vercel.app/api/auth/login'
+      }, { 
+        status: 500,
+        headers: {
+          'Access-Control-Allow-Origin': 'https://the20.co',
+          'Access-Control-Allow-Credentials': 'true'
+        }
+      });
+    }
 }
 
+// Add OPTIONS handler for CORS
 export async function OPTIONS(req: NextRequest) {
-  const origin = req.headers.get('origin');
-  return new Response(null, {
-    status: 204,
-    headers: getCorsHeaders(origin),
+  return new NextResponse(null, {
+    status: 200,
+    headers: {
+      'Access-Control-Allow-Methods': 'GET, POST, OPTIONS',
+      'Access-Control-Allow-Headers': 'Content-Type, Authorization',
+    },
   });
 }
