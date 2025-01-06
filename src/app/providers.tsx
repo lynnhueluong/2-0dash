@@ -1,16 +1,8 @@
+// app/providers.tsx
+'use client';
+
 import { UserProvider } from '@auth0/nextjs-auth0/client';
 
-export default function RootLayout({
-  children,
-}: {
-  children: React.ReactNode;
-}) {
-  return (
-    <html lang="en">
-      <body suppressHydrationWarning>
-        {children}
-      </body>
-    </html>
-  );
+export function Auth0Provider({ children }: { children: React.ReactNode }) {
+  return <UserProvider>{children}</UserProvider>;
 }
-

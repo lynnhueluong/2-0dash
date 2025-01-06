@@ -1,4 +1,4 @@
-import { UserProvider } from '@auth0/nextjs-auth0/client';
+import { Auth0Provider } from './providers';
 import './globals.css'
 import { Inter_Tight } from 'next/font/google'
 
@@ -21,9 +21,9 @@ export default function RootLayout({
   return (
     <html lang="en">
       <body suppressHydrationWarning className={interTight.className}>
-        <UserProvider>
+        <Auth0Provider>
           {children}
-        </UserProvider>
+        </Auth0Provider>
       </body>
     </html>
   );

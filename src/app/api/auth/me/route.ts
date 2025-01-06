@@ -3,18 +3,19 @@ import { getSession } from '@auth0/nextjs-auth0';
 import { NextResponse } from 'next/server';
 
 export async function GET(req: Request) {
-  const session = await getSession();
-  const isLocal = process.env.NODE_ENV === 'development';
-  const baseUrl = isLocal ? 'http://localhost:3000' : 'https://2-0dash.vercel.app';
-  
-  if (!session) {
-    return new Response(null, {
-      status: 302,
-      headers: {
-        Location: `${baseUrl}/api/auth/login`
-      }
-    });
-  }
+  try {
+    const session = await getSession();
+    
+    if (!session) {
+      return NextResponse.redirect(new URL('/api/auth/login', req.url));
+    }
 
-  return NextResponse.json(session.user);
+    return NextResponse.json(session.user);
+  } catch (error) {
+    console.error('Profile error:', error);
+    return NextResponse.json(
+      { error: 'Internal server error' },
+      { status: 500 }
+    );
+  }
 }
