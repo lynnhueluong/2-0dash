@@ -5,7 +5,7 @@ import { useUser } from '@auth0/nextjs-auth0/client';
 import { useRouter } from 'next/navigation';
 import { useEffect } from 'react';
 
-export default function DashboardPage() {
+export default function Dashboard() {
   const { user, error, isLoading } = useUser();
   const router = useRouter();
 
