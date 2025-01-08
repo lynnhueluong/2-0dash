@@ -2,6 +2,8 @@
 import { getSession } from '@auth0/nextjs-auth0';
 import { NextResponse } from 'next/server';
 
+export const dynamic = 'force-dynamic';
+
 export async function GET(req: Request) {
   try {
     const session = await getSession();
@@ -14,7 +16,7 @@ export async function GET(req: Request) {
   } catch (error) {
     console.error('Profile error:', error);
     return NextResponse.json(
-      { error: 'Internal server error' },
+      { error: 'Failed to get user profile' },
       { status: 500 }
     );
   }

@@ -1,23 +1,53 @@
 /** @type {import('next').NextConfig} */
 const nextConfig = {
+  experimental: {
+    serverActions: true,
+  },
   async headers() {
-    const allowedOrigins = [
-      'https://2-0dash.vercel.app',
-      'https://2-0dash-cxxjymn81-lynns-projects-354d9aa2.vercel.app',
-      'http://localhost:3000'
-    ];
-
     return [
       {
         source: '/api/:path*',
         headers: [
           { key: 'Access-Control-Allow-Credentials', value: 'true' },
-          { key: 'Access-Control-Allow-Origin', value: '*' },
-          { key: 'Access-Control-Allow-Methods', value: 'GET,POST,PUT,DELETE,OPTIONS' },
-          { key: 'Access-Control-Allow-Headers', value: 'X-CSRF-Token, X-Requested-With, Accept, Accept-Version, Content-Length, Content-MD5, Content-Type, Date, X-Api-Version' }
+          { 
+            key: 'Access-Control-Allow-Origin', 
+            value: 'https://the20.co'
+          },
+          { 
+            key: 'Access-Control-Allow-Methods', 
+            value: 'GET,POST,PUT,DELETE,OPTIONS' 
+          },
+          { 
+            key: 'Access-Control-Allow-Headers', 
+            value: 'X-CSRF-Token, X-Requested-With, Accept, Accept-Version, Content-Length, Content-MD5, Content-Type, Date, X-Api-Version' 
+          }
+        ],
+      },
+      {
+        // Add specific headers for auth routes
+        source: '/api/auth/:path*',
+        headers: [
+          { key: 'Access-Control-Allow-Credentials', value: 'true' },
+          { key: 'Access-Control-Allow-Origin', value: 'https://the20.co' },
+          { key: 'Access-Control-Allow-Methods', value: 'GET,POST,OPTIONS' },
+          { key: 'Access-Control-Allow-Headers', value: 'Content-Type, Authorization' }
         ],
       }
     ];
+  },
+  
+  webpack: (config, { isServer }) => {
+    if (!isServer) {
+      config.resolve.fallback = {
+        ...config.resolve.fallback,
+        crypto: false,
+        http: false,
+        https: false,
+        stream: false,
+        util: false
+      };
+    }
+    return config;
   }
 };
 
