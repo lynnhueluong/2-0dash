@@ -12,7 +12,8 @@ export const config = {
   matcher: [
     '/dashboard/:path*',
     '/api/protected/:path*',
-    '/((?!api/auth/callback).*)',
-    '!api/auth/:path*'
+    '!api/auth/:path*',
+    '!_next/static/:path*',
+    '!favicon.ico'
   ]
 };

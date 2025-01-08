@@ -15,7 +15,7 @@ export const auth0Config = {
     cookie: {
       domain: process.env.NODE_ENV === 'production' ? '2-0dash.vercel.app' : undefined,
       secure: true,
-      sameSite: 'lax', 
+      sameSite: 'none', 
       httpOnly: true,
       path: '/'
     },

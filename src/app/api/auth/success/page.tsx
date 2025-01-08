@@ -4,29 +4,38 @@
 import { useEffect } from 'react';
 import { useUser } from '@auth0/nextjs-auth0/client';
 
+const MAX_RETRIES = 3;
+const RETRY_DELAY = 1000;
+
 export default function AuthSuccess() {
   const { user, isLoading } = useUser();
 
   useEffect(() => {
-    const setupRedirect = async () => {
-      if (!isLoading && user) {
-        try {
-          // Get state token
-          const tokenResponse = await fetch('/api/auth/state-token');
-          const { stateToken } = await tokenResponse.json();
+    const retryAuth = async (retries = 0): Promise<void> => {
+      try {
+        if (!isLoading && user) {
+          const params = new URLSearchParams(window.location.search);
+          const stateToken = params.get('state');
           
-          // Redirect to Framer with state token
+          if (!stateToken) {
+            throw new Error('Missing state token');
+          }
+          
           const redirectUrl = new URL('https://the20.co/onboarding');
           redirectUrl.searchParams.append('state', stateToken);
           window.location.href = redirectUrl.toString();
-        } catch (error) {
-          console.error('Redirect setup failed:', error);
-          // Redirect to error page or retry
         }
+      } catch (error) {
+        console.error('Auth retry failed:', error);
+        if (retries < MAX_RETRIES) {
+          await new Promise(resolve => setTimeout(resolve, RETRY_DELAY));
+          return retryAuth(retries + 1);
+        }
+        window.location.href = '/api/auth/login';
       }
     };
 
-    setupRedirect();
+    retryAuth();
   }, [user, isLoading]);
 
   return (
