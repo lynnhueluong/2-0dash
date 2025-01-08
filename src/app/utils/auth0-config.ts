@@ -1,5 +1,4 @@
 // auth0-config.ts
-const BASE_URL = process.env.AUTH0_BASE_URL || '';
 
 export const auth0Config = {
   baseURL: process.env.AUTH0_BASE_URL,
@@ -24,11 +23,11 @@ export const auth0Config = {
     rolling: true,
     rollingDuration: 24 * 60 * 60
   },
+  clientAuthMethod: 'client_secret_post',
+  auth0Logout: true,
   authorizationParams: {
     response_type: 'code',
     scope: 'openid profile email',
-    audience: process.env.AUTH0_AUDIENCE,
-    
-
+    audience: process.env.AUTH0_AUDIENCE
   }
 };

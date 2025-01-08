@@ -13,7 +13,12 @@ export const GET = handleAuth({
       scope: 'openid profile email',
       response_type: 'code',
       prompt: 'login'
-    }
+    },
+    getLoginState: () => {
+        return {
+          returnTo: '/auth/success'
+        };
+      }
   }),
   callback: handleCallback({
     afterCallback: async (req: any, res: any, session: Session) => {
