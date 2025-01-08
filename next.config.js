@@ -1,8 +1,6 @@
 /** @type {import('next').NextConfig} */
 const nextConfig = {
-  experimental: {
-    serverActions: true,
-  },
+  
   async headers() {
     return [
       {
@@ -30,7 +28,7 @@ const nextConfig = {
           { key: 'Access-Control-Allow-Credentials', value: 'true' },
           { key: 'Access-Control-Allow-Origin', value: 'https://the20.co' },
           { key: 'Access-Control-Allow-Methods', value: 'GET,POST,OPTIONS' },
-          { key: 'Access-Control-Allow-Headers', value: 'Content-Type, Authorization' }
+          { key: 'Access-Control-Allow-Headers', value: 'Content-Type, Authorization, x-state-token' }
         ],
       }
     ];
