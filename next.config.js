@@ -1,5 +1,11 @@
 /** @type {import('next').NextConfig} */
-const nextConfig = {
+
+module.exports = {
+  experimental: {
+    serverActions: {
+      allowedOrigins: ['dash.the20.co']
+    }
+  },
   async headers() {
     return [
       {
@@ -8,21 +14,14 @@ const nextConfig = {
           { key: 'Access-Control-Allow-Credentials', value: 'true' },
           { key: 'Access-Control-Allow-Origin', value: 'https://dash.the20.co' },
           { key: 'Access-Control-Allow-Methods', value: 'GET,POST,OPTIONS' },
-          { 
-            key: 'Access-Control-Allow-Headers',
-            value: 'X-CSRF-Token, X-Requested-With, Accept, Accept-Version, Content-Length, Content-MD5, Content-Type, Date, X-Api-Version, Authorization'
-          }
         ]
       }
     ];
   },
+  // Add explicit cookie handling
   cookies: {
+    sameSite: 'strict',
     secure: process.env.NODE_ENV === 'production',
-    sameSite: 'lax',
-    domain: '.the20.co',
-    path: '/',
+    httpOnly: true
   }
-  
 };
-
-module.exports = nextConfig;

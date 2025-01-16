@@ -15,7 +15,7 @@ export const GET = handleAuth({
 
       return {
         ...session,
-        returnTo: '/'
+        returnTo: '/home'
       };
     }
   }),

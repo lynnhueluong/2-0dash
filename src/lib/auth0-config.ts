@@ -14,13 +14,13 @@ export const auth0Config = {
     scope: 'openid profile email'
   },
   session: {
-    absoluteDuration: 24 * 60 * 60, // 24 hours
-    // Remove domain setting
-    rolling: true, // Enable rolling session
+    absoluteDuration: 24 * 60 * 60,
+    rolling: true,
     cookie: {
-      domain: process.env.COOKIE_DOMAIN || 'dash.the20.co', // Use environment variable
-      secure: true, // Ensure secure cookie
-      sameSite: 'strict' // Use stricter same-site policy
+      secure: true,
+      sameSite: 'strict',
+      domain: process.env.COOKIE_DOMAIN || 'dash.the20.co',
+      httpOnly: true
     }
   },
   // Add these configurations
