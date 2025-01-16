@@ -1,3 +1,4 @@
+//src/app/api/onboarding/route.ts
 import { NextRequest, NextResponse } from 'next/server';
 import { getSession } from '@auth0/nextjs-auth0';
 import Airtable from 'airtable';
@@ -7,58 +8,28 @@ export const dynamic = 'force-dynamic';
 const base = new Airtable({ apiKey: process.env.AIRTABLE_API_KEY })
   .base(process.env.AIRTABLE_BASE_ID!);
 
-export async function GET(req: NextRequest) {
-  try {
-    const response = new NextResponse();
-    const session = await getSession(req, response);
-    
-    if (!session?.user) {
-      return new NextResponse(
-        JSON.stringify({ 
-          error: 'Not authenticated',
-          redirectUrl: 'https://2-0dash.vercel.app/api/auth/login' 
-        }), 
-        { 
-          status: 401,
-          headers: {
-            'Access-Control-Allow-Origin': '*' ,
-            'Access-Control-Allow-Credentials': 'true',
-            'Content-Type': 'application/json'
-          }
-        }
+  export async function GET(req: Request) {
+    try {
+      const session = await getSession();
+      
+      if (!session?.user) {
+        return NextResponse.json({ error: 'Not authenticated' }, { status: 401 });
+      }
+  
+      // Check if the user has completed onboarding
+      const isOnboardingCompleted = session.user.user_metadata?.onboardingCompleted || false;
+  
+      return NextResponse.json({
+        isOnboardingCompleted
+      });
+    } catch (error) {
+      console.error('Onboarding check error:', error);
+      return NextResponse.json(
+        { error: 'Failed to check onboarding status' },
+        { status: 500 }
       );
     }
-
-    return new NextResponse(
-      JSON.stringify({ 
-        success: true,
-        user: session.user
-      }), 
-      {
-        headers: {
-          'Access-Control-Allow-Origin': '*' ,
-          'Access-Control-Allow-Credentials': 'true',
-          'Content-Type': 'application/json'
-        }
-      }
-    );
-  } catch (error) {
-    return new NextResponse(
-      JSON.stringify({ 
-        error: 'Session error',
-        redirectUrl: 'https://2-0dash.vercel.app/api/auth/login' 
-      }), 
-      { 
-        status: 500,
-        headers: {
-          'Access-Control-Allow-Origin': '*' ,
-          'Access-Control-Allow-Credentials': 'true',
-          'Content-Type': 'application/json'
-        }
-      }
-    );
   }
-}
 
 export async function POST(req: NextRequest) {
   try {
@@ -69,16 +40,9 @@ export async function POST(req: NextRequest) {
       return new NextResponse(
         JSON.stringify({
           error: 'Not authenticated',
-          redirectUrl: 'https://2-0dash.vercel.app/api/auth/login'
+          redirectUrl: '/api/auth/login'
         }), 
-        { 
-          status: 401,
-          headers: {
-            'Access-Control-Allow-Origin': '*' ,
-            'Access-Control-Allow-Credentials': 'true',
-            'Content-Type': 'application/json'
-          }
-        }
+        { status: 401 }
       );
     }
 
@@ -97,7 +61,6 @@ export async function POST(req: NextRequest) {
     });
 
     if (!metadataResponse.ok) {
-      console.error('Metadata update failed:', await metadataResponse.text());
       throw new Error('Failed to update user metadata');
     }
     
@@ -128,13 +91,12 @@ export async function POST(req: NextRequest) {
       })
     };
 
-    let record;
     if (records.length > 0) {
-      record = await base('Member Rolodex Admin').update([
+      await base('Member Rolodex Admin').update([
         { id: records[0].id, fields: recordData }
       ]);
     } else {
-      record = await base('Member Rolodex Admin').create([
+      await base('Member Rolodex Admin').create([
         { fields: recordData }
       ]);
     }
@@ -142,12 +104,10 @@ export async function POST(req: NextRequest) {
     return new NextResponse(
       JSON.stringify({
         success: true,
-        redirectUrl: 'https://2-0dash.vercel.app/dashboard'
+        redirectUrl: '/home'
       }),
       {
         headers: {
-          'Access-Control-Allow-Origin': 'https://the20.co',
-          'Access-Control-Allow-Credentials': 'true',
           'Content-Type': 'application/json'
         }
       }
@@ -156,16 +116,9 @@ export async function POST(req: NextRequest) {
     return new NextResponse(
       JSON.stringify({
         error: error.message || 'Server error',
-        redirectUrl: 'https://2-0dash.vercel.app/api/auth/login'
+        redirectUrl: '/api/auth/login'
       }), 
-      { 
-        status: 500,
-        headers: {
-          'Access-Control-Allow-Origin': 'https://the20.co',
-          'Access-Control-Allow-Credentials': 'true',
-          'Content-Type': 'application/json'
-        }
-      }
+      { status: 500 }
     );
   }
 }

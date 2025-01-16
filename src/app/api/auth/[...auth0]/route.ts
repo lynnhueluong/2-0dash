@@ -1,41 +1,41 @@
-// app/api/auth/[...auth0]/route.ts
-import { handleAuth, handleCallback, handleLogin, Session } from '@auth0/nextjs-auth0';
-import { Redis } from '@upstash/redis';
-
-const redis = new Redis({
-  url: process.env.UPSTASH_REDIS_REST_URL!,
-  token: process.env.UPSTASH_REDIS_REST_TOKEN!
-});
+import { handleAuth, handleLogin, handleCallback } from '@auth0/nextjs-auth0';
+import { NextApiRequest, NextApiResponse } from 'next';
+import { Session } from '@auth0/nextjs-auth0';
 
 export const GET = handleAuth({
-  login: handleLogin({
-    returnTo: '/auth/success',
+  callback: handleCallback({
+    async afterCallback(req: NextApiRequest, res: NextApiResponse, session: Session) {
+
+        if (!session.user.user_metadata?.onboardingCompleted) {
+        return {
+          ...session,
+          returnTo: '/onboarding'
+        };
+      }
+
+      return {
+        ...session,
+        returnTo: '/'
+      };
+    }
+  }),
+  signup: handleLogin({
     authorizationParams: {
       audience: process.env.AUTH0_AUDIENCE,
       scope: 'openid profile email',
-      response_type: 'code',
+      screen_hint: 'signup',
       prompt: 'login'
     },
-    getLoginState: () => ({
-      returnTo: '/auth/success'
-    })
+    returnTo: '/onboarding'
   }),
-  callback: handleCallback({
-    afterCallback: async (req: any, res: any, session: Session) => {
-      if (!session) {
-        throw new Error('No session available');
-      }
-      
-      // Store session state in Redis
-      const stateToken = crypto.randomUUID();
-      await redis.set(`auth_state:${stateToken}`, session.user.sub, {
-        ex: 3600 // 1 hour expiry
-      });
-      
-      return {
-        ...session,
-        returnTo: `/auth/success?state=${stateToken}`
-      };
-    }
+  login: handleLogin({
+    authorizationParams: {
+      audience: process.env.AUTH0_AUDIENCE,
+      scope: 'openid profile email',
+      prompt: 'login'
+    },
+    returnTo: '/home'
   })
 });
+
+export const dynamic = 'force-dynamic';

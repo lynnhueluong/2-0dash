@@ -6,6 +6,12 @@ export interface OnboardingFormData {
   tenKView: string;
 }
 
+export interface OnboardingState {
+  isComplete: boolean;
+  currentStep: number;
+
+}
+
 export interface ApiResponse {
   success: boolean;
   data?: any;

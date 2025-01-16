@@ -2,7 +2,6 @@
 import { Auth0Provider } from './providers';
 import './globals.css';
 import { Inter_Tight } from 'next/font/google';
-import { auth0Config } from './utils/auth0-config';
 
 const interTight = Inter_Tight({ 
   subsets: ['latin'],
@@ -22,7 +21,7 @@ export default function RootLayout({
   return (
     <html lang="en">
       <body suppressHydrationWarning className={interTight.className}>
-        <Auth0Provider {...auth0Config}>
+        <Auth0Provider>
           {children}
         </Auth0Provider>
       </body>

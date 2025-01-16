@@ -1,11 +1,11 @@
-// src/app/dashboard/page.tsx
+// src/app/home/page.tsx
 'use client';
 
 import { useUser } from '@auth0/nextjs-auth0/client';
 import { useRouter } from 'next/navigation';
 import { useEffect } from 'react';
 
-export default function Dashboard() {
+export default function Home() {
   const { user, error, isLoading } = useUser();
   const router = useRouter();
 
