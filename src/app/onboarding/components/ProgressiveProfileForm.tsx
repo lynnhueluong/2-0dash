@@ -4,6 +4,8 @@
 import { useState } from 'react';
 import { useRouter } from 'next/navigation';
 import { useUser } from '@auth0/nextjs-auth0/client';
+import { ProgressiveProfileFormProps } from '../../../types/onboarding';
+
 
 const STEPS = {
   BASIC_INFO: 'basic_info',
@@ -24,10 +26,12 @@ interface FormState {
   currentCompany: string;
   identityPreference: string[];
   pronouns: string;
+  
 }
 
-export default function ProgressiveProfileForm() {
-  const { user } = useUser();
+export default function ProgressiveProfileForm({ 
+  onComplete 
+}: ProgressiveProfileFormProps = {}) {  const { user } = useUser();
   const router = useRouter();
   const [currentStep, setCurrentStep] = useState(STEPS.BASIC_INFO);
   const [stateToken, setStateToken] = useState('');
@@ -42,7 +46,8 @@ export default function ProgressiveProfileForm() {
     currentRole: '',
     currentCompany: '',
     identityPreference: [],
-    pronouns: ''
+    pronouns: '',
+    
   });
 
   const handleSubmit = async (e: React.FormEvent) => {
@@ -71,13 +76,17 @@ export default function ProgressiveProfileForm() {
       });
 
       if (!response.ok) throw new Error('Profile submission failed');
-      
-      router.push('/home');
+
+      if (onComplete) {
+        await onComplete(formState);
+      } else {
+        router.push('/home');
+      }
     } catch (error) {
       console.error('Form submission error:', error);
     }
   };
-
+    
   const getNextStep = (current: string) => {
     switch (current) {
       case STEPS.BASIC_INFO: return STEPS.IDENTITY;

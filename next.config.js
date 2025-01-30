@@ -18,9 +18,8 @@ module.exports = {
       }
     ];
   },
-  // Add explicit cookie handling
   cookies: {
-    sameSite: 'strict',
+    sameSite: 'lax',
     secure: process.env.NODE_ENV === 'production',
     httpOnly: true
   }

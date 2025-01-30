@@ -18,12 +18,9 @@ export const auth0Config = {
     rolling: true,
     cookie: {
       secure: true,
-      sameSite: 'strict',
+      sameSite: 'lax',
       domain: process.env.COOKIE_DOMAIN || 'dash.the20.co',
       httpOnly: true
     }
-  },
-  // Add these configurations
-  redirectUri: 'https://dash.the20.co/api/auth/callback',
-  postLogoutRedirectUri: 'https://dash.the20.co/login'
+  }
 };

@@ -1,3 +1,4 @@
+//src/app/api/auth/[...auth0]/route.ts
 import { handleAuth, handleLogin, handleCallback } from '@auth0/nextjs-auth0';
 import { NextApiRequest, NextApiResponse } from 'next';
 import { Session } from '@auth0/nextjs-auth0';
@@ -5,8 +6,7 @@ import { Session } from '@auth0/nextjs-auth0';
 export const GET = handleAuth({
   callback: handleCallback({
     async afterCallback(req: NextApiRequest, res: NextApiResponse, session: Session) {
-
-        if (!session.user.user_metadata?.onboardingCompleted) {
+      if (!session.user.user_metadata?.onboardingCompleted) {
         return {
           ...session,
           returnTo: '/onboarding'

@@ -12,6 +12,11 @@ export async function GET(req: NextRequest) {
       return NextResponse.json({ error: 'Unauthorized' }, { status: 401 });
     }
 
+    // Check if a state token already exists in the session
+    if (session.user.stateToken) {
+      return NextResponse.json({ stateToken: session.user.stateToken });
+    }
+
     // Generate a unique state token
     const stateToken = uuidv4();
 

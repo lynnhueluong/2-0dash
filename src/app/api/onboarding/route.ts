@@ -1,4 +1,3 @@
-//src/app/api/onboarding/route.ts
 import { NextRequest, NextResponse } from 'next/server';
 import { getSession } from '@auth0/nextjs-auth0';
 import Airtable from 'airtable';
@@ -8,28 +7,38 @@ export const dynamic = 'force-dynamic';
 const base = new Airtable({ apiKey: process.env.AIRTABLE_API_KEY })
   .base(process.env.AIRTABLE_BASE_ID!);
 
-  export async function GET(req: Request) {
-    try {
-      const session = await getSession();
-      
-      if (!session?.user) {
-        return NextResponse.json({ error: 'Not authenticated' }, { status: 401 });
-      }
-  
-      // Check if the user has completed onboarding
-      const isOnboardingCompleted = session.user.user_metadata?.onboardingCompleted || false;
-  
-      return NextResponse.json({
-        isOnboardingCompleted
-      });
-    } catch (error) {
-      console.error('Onboarding check error:', error);
-      return NextResponse.json(
-        { error: 'Failed to check onboarding status' },
-        { status: 500 }
-      );
+export async function GET(req: Request) {
+  try {
+    const session = await getSession();
+    
+    if (!session?.user) {
+      return NextResponse.json({ error: 'Not authenticated' }, { status: 401 });
     }
+
+    // Check if the user has completed onboarding
+    const isOnboardingCompleted = session.user.user_metadata?.onboardingCompleted || false;
+
+    return NextResponse.json({
+      isOnboardingCompleted
+    }, {
+      headers: {
+        'Access-Control-Allow-Origin': 'https://dash.the20.co',
+        'Access-Control-Allow-Methods': 'GET, POST, OPTIONS',
+        'Access-Control-Allow-Headers': 'Content-Type, Authorization'
+      }
+    });
+  } catch (error) {
+    console.error('Onboarding check error:', error);
+    return NextResponse.json(
+      { error: 'Failed to check onboarding status' },
+      { status: 500, headers: {
+        'Access-Control-Allow-Origin': 'https://dash.the20.co',
+        'Access-Control-Allow-Methods': 'GET, POST, OPTIONS',
+        'Access-Control-Allow-Headers': 'Content-Type, Authorization'
+      }}
+    );
   }
+}
 
 export async function POST(req: NextRequest) {
   try {
@@ -42,7 +51,11 @@ export async function POST(req: NextRequest) {
           error: 'Not authenticated',
           redirectUrl: '/api/auth/login'
         }), 
-        { status: 401 }
+        { status: 401, headers: {
+          'Access-Control-Allow-Origin': 'https://dash.the20.co',
+          'Access-Control-Allow-Methods': 'GET, POST, OPTIONS',
+          'Access-Control-Allow-Headers': 'Content-Type, Authorization'
+        }}
       );
     }
 
@@ -56,14 +69,18 @@ export async function POST(req: NextRequest) {
         'Authorization': `Bearer ${process.env.AUTH0_MANAGEMENT_API_TOKEN}`
       },
       body: JSON.stringify({
-        app_metadata: { onboarded: true }
+        app_metadata: { 
+          onboarded: true,
+          // Add any additional metadata you want to store
+          onboardingCompletedAt: new Date().toISOString()
+        }
       })
     });
 
     if (!metadataResponse.ok) {
       throw new Error('Failed to update user metadata');
     }
-    
+
     const records = await base('Member Rolodex Admin').select({
       filterByFormula: `{Email} = '${session.user.email}'`
     }).firstPage();
@@ -108,7 +125,10 @@ export async function POST(req: NextRequest) {
       }),
       {
         headers: {
-          'Content-Type': 'application/json'
+          'Content-Type': 'application/json',
+          'Access-Control-Allow-Origin': 'https://dash.the20.co',
+          'Access-Control-Allow-Methods': 'GET, POST, OPTIONS',
+          'Access-Control-Allow-Headers': 'Content-Type, Authorization'
         }
       }
     );
@@ -118,7 +138,11 @@ export async function POST(req: NextRequest) {
         error: error.message || 'Server error',
         redirectUrl: '/api/auth/login'
       }), 
-      { status: 500 }
+      { status: 500, headers: {
+        'Access-Control-Allow-Origin': 'https://dash.the20.co',
+        'Access-Control-Allow-Methods': 'GET, POST, OPTIONS',
+        'Access-Control-Allow-Headers': 'Content-Type, Authorization'
+      }}
     );
   }
 }
@@ -129,7 +153,7 @@ export async function OPTIONS(req: NextRequest) {
     headers: {
       'Access-Control-Allow-Methods': 'GET, POST, OPTIONS',
       'Access-Control-Allow-Headers': 'Content-Type, Authorization',
-      'Access-Control-Allow-Origin': '*' ,
+      'Access-Control-Allow-Origin': '*',
       'Access-Control-Allow-Credentials': 'true',
     },
   });
