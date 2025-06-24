@@ -3,54 +3,48 @@
 
 import { useUser } from '@auth0/nextjs-auth0/client';
 import { useRouter } from 'next/navigation';
-import { useEffect } from 'react';
+import { useEffect, useState } from 'react';
+import UnifiedDashboard from '@/components/UnifiedDashboard';
 
-export default function Home() {
-  const { user, error, isLoading } = useUser();
+export default function HomePage() {
+  const { user, isLoading } = useUser();
   const router = useRouter();
+  const [userProfile, setUserProfile] = useState(null);
 
   useEffect(() => {
-    if (!isLoading && !user) {
-      router.push('/api/auth/login');
+    if (!isLoading) {
+      if (!user) {
+        router.push('/api/auth/login');
+      } else if (!user.user_metadata?.onboardingCompleted) {
+        router.push('/onboarding');
+      } else {
+        fetchUserProfile();
+      }
     }
   }, [user, isLoading, router]);
 
-  if (isLoading) {
+  const fetchUserProfile = async () => {
+    try {
+      const response = await fetch('/api/user-profile');
+      if (response.ok) {
+        const profile = await response.json();
+        setUserProfile(profile);
+      }
+    } catch (error) {
+      console.error('Error fetching user profile:', error);
+    }
+  };
+
+  if (isLoading || !user || !userProfile) {
     return (
-      <div className="flex items-center justify-center min-h-[50vh]">
-        <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-gray-900" />
-      </div>
-    );
-  }
-
-  if (error) {
-    return (
-      <div className="p-4 text-red-600 bg-red-50 rounded-md">
-        Error: {error.message}
-      </div>
-    );
-  }
-
-  if (!user) return null;
-
-  return (
-    <div className="space-y-6">
-      <div className="flex items-center justify-between">
-        <h1 className="text-2xl font-semibold">Welcome to Dashboard</h1>
-        <a
-          href="/api/auth/logout"
-          className="px-4 py-2 text-sm bg-gray-100 hover:bg-gray-200 rounded-md transition-colors"
-        >
-          Logout
-        </a>
-      </div>
-      
-      <div className="p-4 bg-white rounded-lg shadow">
-        <div className="space-y-2">
-          <p className="text-gray-600">Logged in as:</p>
-          <p className="font-medium">{user.email}</p>
+      <div className="min-h-screen flex items-center justify-center">
+        <div className="text-center">
+          <div className="w-8 h-8 border-4 border-blue-600 border-t-transparent rounded-full animate-spin mx-auto mb-4"></div>
+          <p className="text-gray-600">Loading your dashboard...</p>
         </div>
       </div>
-    </div>
-  );
+    );
+  }
+
+  return <UnifiedDashboard userProfile={userProfile} />;
 }

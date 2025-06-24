@@ -40,111 +40,114 @@ export async function GET(req: Request) {
   }
 }
 
-export async function POST(req: NextRequest) {
+export async function POST(request: NextRequest) {
   try {
-    const response = new NextResponse();
-    const session = await getSession(req, response);
+    const session = await getSession();
     
     if (!session?.user) {
-      return new NextResponse(
-        JSON.stringify({
-          error: 'Not authenticated',
-          redirectUrl: '/api/auth/login'
-        }), 
-        { status: 401, headers: {
-          'Access-Control-Allow-Origin': 'https://dash.the20.co',
-          'Access-Control-Allow-Methods': 'GET, POST, OPTIONS',
-          'Access-Control-Allow-Headers': 'Content-Type, Authorization'
-        }}
-      );
+      return NextResponse.json({ message: 'Unauthorized' }, { status: 401 });
     }
 
-    const formData = await req.json();
+    const onboardingData = await request.json();
     
-    // Update Auth0 user metadata
-    const metadataResponse = await fetch(`https://${process.env.AUTH0_DOMAIN}/api/v2/users/${session.user.sub}`, {
-      method: 'PATCH',
+    // Save to Airtable
+    const airtableResponse = await fetch(`https://api.airtable.com/v0/${process.env.AIRTABLE_BASE_ID}/Users`, {
+      method: 'POST',
       headers: {
+        'Authorization': `Bearer ${process.env.AIRTABLE_API_KEY}`,
         'Content-Type': 'application/json',
-        'Authorization': `Bearer ${process.env.AUTH0_MANAGEMENT_API_TOKEN}`
       },
       body: JSON.stringify({
-        app_metadata: { 
-          onboarded: true,
-          // Add any additional metadata you want to store
-          onboardingCompletedAt: new Date().toISOString()
+        fields: {
+          'Auth0 ID': session.user.sub,
+          'Email': session.user.email,
+          'Name': onboardingData.name,
+          'Preferred Name': onboardingData.preferredName,
+          'Pronouns': onboardingData.pronouns,
+          'Onboarding Data': JSON.stringify(onboardingData),
+          'Onboarding Completed': true,
+          'Created At': new Date().toISOString(),
+          
+          // Key fields for matching algorithm
+          'Skills': onboardingData.skillsExpertise,
+          'Work Style': onboardingData.workStyle,
+          'Career Goals': onboardingData.careerAdvancement.join(', '),
+          'Ideal Career': onboardingData.idealCareer,
+          'Resource Preferences': onboardingData.resourceTypes.join(', '),
+          'Current Role': onboardingData.currentRole,
+          'Career Stage': determineCareerStage(onboardingData)
         }
       })
     });
 
-    if (!metadataResponse.ok) {
-      throw new Error('Failed to update user metadata');
+    if (!airtableResponse.ok) {
+      throw new Error('Failed to save to Airtable');
     }
 
-    const records = await base('Member Rolodex Admin').select({
-      filterByFormula: `{Email} = '${session.user.email}'`
-    }).firstPage();
-
-    const recordData = {
-      'Name': formData.name, 
-      'City': formData.city,
-      '10,000-ft view': formData.tenKView, 
-      'Career Stage': formData.careerStage,
-      'Email': session.user.email,
-      ...(formData.careerStagePreference && {
-        'Career Stage Preference': formData.careerStagePreference
-      }),
-      ...(formData.breadAndButter && {
-        'Bread + Butter': formData.breadAndButter
-      }),
-      ...(formData.otherSkills && {
-        '& - other things I do': formData.otherSkills
-      }),
-      ...(formData.currentRole && {
-        'Current Role': formData.currentRole
-      }),
-      ...(formData.currentCompany && {
-        'Current Company': formData.currentCompany
-      })
-    };
-
-    if (records.length > 0) {
-      await base('Member Rolodex Admin').update([
-        { id: records[0].id, fields: recordData }
-      ]);
-    } else {
-      await base('Member Rolodex Admin').create([
-        { fields: recordData }
-      ]);
-    }
-
-    return new NextResponse(
-      JSON.stringify({
-        success: true,
-        redirectUrl: '/home'
-      }),
-      {
+    // Update Auth0 user metadata using Management API
+    const managementToken = process.env.AUTH0_MANAGEMENT_API_TOKEN;
+    const auth0Domain = process.env.AUTH0_ISSUER_BASE_URL?.replace('https://', '');
+    
+    if (managementToken && auth0Domain) {
+      const updateResponse = await fetch(`https://${auth0Domain}/api/v2/users/${session.user.sub}`, {
+        method: 'PATCH',
         headers: {
+          'Authorization': `Bearer ${managementToken}`,
           'Content-Type': 'application/json',
-          'Access-Control-Allow-Origin': 'https://dash.the20.co',
-          'Access-Control-Allow-Methods': 'GET, POST, OPTIONS',
-          'Access-Control-Allow-Headers': 'Content-Type, Authorization'
-        }
+        },
+        body: JSON.stringify({
+          user_metadata: {
+            onboardingCompleted: true,
+            profileData: {
+              name: onboardingData.name,
+              preferredName: onboardingData.preferredName,
+              pronouns: onboardingData.pronouns,
+              careerStage: determineCareerStage(onboardingData),
+              skills: extractSkills(onboardingData.skillsExpertise)
+            }
+          }
+        })
+      });
+
+      if (!updateResponse.ok) {
+        console.error('Failed to update Auth0 user metadata');
       }
-    );
-  } catch (error: any) {
-    return new NextResponse(
-      JSON.stringify({
-        error: error.message || 'Server error',
-        redirectUrl: '/api/auth/login'
-      }), 
-      { status: 500, headers: {
-        'Access-Control-Allow-Origin': 'https://dash.the20.co',
-        'Access-Control-Allow-Methods': 'GET, POST, OPTIONS',
-        'Access-Control-Allow-Headers': 'Content-Type, Authorization'
-      }}
-    );
+    }
+
+    return NextResponse.json({ 
+      message: 'Onboarding completed successfully',
+      redirectTo: '/home'
+    });
+
+  } catch (error) {
+    console.error('Onboarding error:', error);
+    return NextResponse.json({ message: 'Internal server error' }, { status: 500 });
   }
+}
+
+// Helper functions
+function determineCareerStage(data: any): string {
+  const currentRole = data.currentRole?.toLowerCase() || '';
+  
+  if (currentRole.includes('senior') || currentRole.includes('lead') || currentRole.includes('manager')) {
+    return 'Advanced Career';
+  } else if (currentRole.includes('junior') || currentRole.includes('intern') || currentRole.includes('entry')) {
+    return 'Early Career';
+  } else {
+    return 'Mid-Career';
+  }
+}
+
+function extractSkills(skillsText: string): string[] {
+  const commonSkills = [
+    'React', 'JavaScript', 'Python', 'Product Management', 'UX Design', 
+    'Data Analysis', 'Marketing', 'Sales', 'Finance', 'Machine Learning',
+    'Project Management', 'Leadership', 'Strategy', 'Operations'
+  ];
+  
+  return commonSkills.filter(skill => 
+    skillsText.toLowerCase().includes(skill.toLowerCase())
+  );
 }
 
 export async function OPTIONS(req: NextRequest) {
