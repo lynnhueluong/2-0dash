@@ -1,5 +1,5 @@
 // app/layout.tsx
-import { Auth0Provider } from './providers';
+import Providers from './providers';
 import './globals.css';
 import { Inter_Tight } from 'next/font/google';
 
@@ -21,9 +21,9 @@ export default function RootLayout({
   return (
     <html lang="en">
       <body suppressHydrationWarning className={interTight.className}>
-        <Auth0Provider>
+        <Providers>
           {children}
-        </Auth0Provider>
+        </Providers>
       </body>
     </html>
   );
