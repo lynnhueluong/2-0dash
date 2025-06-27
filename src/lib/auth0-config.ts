@@ -1,4 +1,4 @@
-// Auth0 configuration for v3
+// Auth0 configuration for v3 - Vercel compatible
 export const auth0Config = {
   secret: process.env.AUTH0_SECRET,
   issuerBaseURL: process.env.AUTH0_ISSUER_BASE_URL,
@@ -12,13 +12,28 @@ export const auth0Config = {
   session: {
     absoluteDuration: 24 * 60 * 60, // 24 hours
   },
-  // Simplified cookie configuration for Vercel compatibility
+  // Explicit cookie configuration for Vercel
   cookies: {
     sessionToken: {
       name: `appSession`,
       httpOnly: true,
       sameSite: 'lax',
       secure: process.env.NODE_ENV === 'production',
+      path: '/',
+    },
+    state: {
+      name: `appState`,
+      httpOnly: true,
+      sameSite: 'lax',
+      secure: process.env.NODE_ENV === 'production',
+      path: '/',
+    },
+    nonce: {
+      name: `appNonce`,
+      httpOnly: true,
+      sameSite: 'lax',
+      secure: process.env.NODE_ENV === 'production',
+      path: '/',
     },
   },
 };
