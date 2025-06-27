@@ -1,35 +1,56 @@
 // src/app/page.tsx
 'use client';
 
-import { useUser } from '@auth0/nextjs-auth0/client';
-import { useEffect } from 'react';
+import { useUser } from '@auth0/nextjs-auth0';
 import { useRouter } from 'next/navigation';
+import { useEffect } from 'react';
 
 export default function Home() {
-  const { user, isLoading } = useUser();
+  const { user, error, isLoading } = useUser();
   const router = useRouter();
 
   useEffect(() => {
-    if (!isLoading && user) {
-      router.push('/dashboard');
+    if (!isLoading && !user) {
+      router.push('/api/auth/login');
     }
   }, [user, isLoading, router]);
 
-  return (
-    <main className="min-h-screen flex flex-col items-center justify-center p-4 bg-gray-50">
-      {isLoading ? (
+  if (isLoading) {
+    return (
+      <div className="flex items-center justify-center min-h-[50vh]">
         <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-gray-900" />
-      ) : (
-        <div className="text-center space-y-4">
-          <h1 className="text-4xl font-bold">Welcome</h1>
-          <a
-            href="/api/auth/login"
-            className="inline-block px-6 py-2 bg-blue-600 text-white rounded-md hover:bg-blue-700 transition-colors"
-          >
-            Login
-          </a>
+      </div>
+    );
+  }
+
+  if (error) {
+    return (
+      <div className="p-4 text-red-600 bg-red-50 rounded-md">
+        Error: {error.message}
+      </div>
+    );
+  }
+
+  if (!user) return null;
+
+  return (
+    <div className="space-y-6">
+      <div className="flex items-center justify-between">
+        <h1 className="text-2xl font-semibold">Welcome to Dashboard</h1>
+        <a
+          href="/api/auth/logout"
+          className="px-4 py-2 text-sm bg-gray-100 hover:bg-gray-200 rounded-md transition-colors"
+        >
+          Logout
+        </a>
+      </div>
+      
+      <div className="p-4 bg-white rounded-lg shadow">
+        <div className="space-y-2">
+          <p className="text-gray-600">Logged in as:</p>
+          <p className="font-medium">{user.email}</p>
         </div>
-      )}
-    </main>
+      </div>
+    </div>
   );
 }

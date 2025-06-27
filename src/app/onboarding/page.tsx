@@ -1,7 +1,7 @@
 // src/app/onboarding/page.tsx - Onboarding page component
 'use client';
 
-import { useUser } from '@auth0/nextjs-auth0/client';
+import { useUser } from '@auth0/nextjs-auth0';
 import { useRouter } from 'next/navigation';
 import { useEffect } from 'react';
 import OnboardingFlow from '@/components/OnboardingFlow';
@@ -11,7 +11,6 @@ export default function OnboardingPage() {
   const router = useRouter();
 
   useEffect(() => {
-    
     if (!isLoading) {
       if (!user) {
         // Not authenticated, redirect to login

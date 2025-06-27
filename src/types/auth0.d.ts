@@ -1,6 +1,6 @@
-import { UserProfile } from '@auth0/nextjs-auth0/client';
+import { UserProfile } from '@auth0/nextjs-auth0';
 
-declare module '@auth0/nextjs-auth0/client' {
+declare module '@auth0/nextjs-auth0' {
   interface UserProfile {
     user_metadata?: {
       onboardingCompleted?: boolean;
