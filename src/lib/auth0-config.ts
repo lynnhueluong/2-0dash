@@ -1,6 +1,6 @@
 export const auth0Config = {
   baseURL: process.env.AUTH0_BASE_URL || 'https://dash.the20.co',
-  issuerBaseURL: process.env.AUTH0_ISSUER_BASE_URL || 'https://auth.the20.co',
+  issuerBaseURL: process.env.AUTH0_ISSUER_BASE_URL || 'https://dev-ab3pdmudhqy8iz2p.us.auth0.com',
   clientID: process.env.AUTH0_CLIENT_ID!,
   clientSecret: process.env.AUTH0_CLIENT_SECRET!,
   secret: process.env.AUTH0_SECRET!,
