@@ -8,5 +8,17 @@ export const auth0Config = {
   authorizationParams: {
     audience: process.env.AUTH0_AUDIENCE,
     scope: 'openid profile email'
-  }
+  },
+  session: {
+    absoluteDuration: 24 * 60 * 60, // 24 hours
+  },
+  // Simplified cookie configuration for Vercel compatibility
+  cookies: {
+    sessionToken: {
+      name: `appSession`,
+      httpOnly: true,
+      sameSite: 'lax',
+      secure: process.env.NODE_ENV === 'production',
+    },
+  },
 };
