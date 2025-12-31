@@ -3,6 +3,9 @@
 import React, { useState } from 'react';
 import { supabase } from '@/lib/supabase';
 
+// Force dynamic rendering - don't prerender this page
+export const dynamic = 'force-dynamic';
+
 export default function YearEndReflection() {
   const [step, setStep] = useState(0);
   const [saving, setSaving] = useState(false);
