@@ -1,0 +1,525 @@
+/* ============================================
+   CAREER TRANSLATOR BRAND SYSTEM
+   Version 1.0 - January 2026
+   ============================================ */
+
+/* COLOR SYSTEM */
+:root {
+  /* Primary Colors */
+  --ct-primary: #3d6aff;
+  --ct-success: #e0fff1;
+  --ct-warning: #ff5010;
+
+  /* Gradient */
+  --ct-gradient-primary: linear-gradient(135deg, #3d6aff 0%, #e0fff1 100%);
+
+  /* Backgrounds */
+  --ct-bg-neutral: #f7faff;
+  --ct-bg-elevated: #fbfff5;
+
+  /* Text Colors - Light Background */
+  --ct-text-primary-light: #0b101f;
+  --ct-text-secondary-light: #727c9d;
+
+  /* Text Colors - On Primary */
+  --ct-text-primary-on-primary: #3d6aff;
+  --ct-text-secondary-on-primary: #7994ed;
+
+  /* Text Colors - On Success */
+  --ct-text-primary-on-success: #0b101f;
+  --ct-text-secondary-on-success: #608876;
+
+  /* Border Radius Scale */
+  --ct-radius-xs: 3px;
+  --ct-radius-sm: 7px;
+  --ct-radius-md: 10px;
+  --ct-radius-lg: 15px;
+  --ct-radius-xl: 20px;
+  --ct-radius-full: 100px;
+
+  /* Spacing Scale (8px base) */
+  --ct-space-xs: 8px;
+  --ct-space-sm: 16px;
+  --ct-space-md: 24px;
+  --ct-space-lg: 40px;
+  --ct-space-xl: 64px;
+  --ct-space-2xl: 96px;
+
+  /* Shadows - Style 1: Subtle Raised Pill */
+  --ct-shadow-pill-sm:
+    inset 0 -2px 4px rgba(0, 0, 0, 0.1),
+    0 2px 8px rgba(61, 92, 255, 0.15);
+
+  --ct-shadow-pill-md:
+    inset 0 -3px 6px rgba(0, 0, 0, 0.12),
+    0 4px 12px rgba(61, 92, 255, 0.2);
+
+  /* Shadows - Style 2: Neon Glow (for special moments) */
+  --ct-shadow-glow-primary:
+    0 0 20px rgba(61, 92, 255, 0.6),
+    0 0 40px rgba(61, 92, 255, 0.3);
+
+  --ct-shadow-glow-success:
+    0 0 20px rgba(224, 255, 241, 0.6),
+    0 0 40px rgba(224, 255, 241, 0.3);
+}
+
+/* ============================================
+   TYPOGRAPHY SYSTEM
+   ============================================ */
+
+/* Railroad Gothic CC - Must be imported/installed */
+@font-face {
+  font-family: 'Railroad Gothic CC';
+  src: url('/fonts/RailroadGothicCC.woff2') format('woff2');
+  font-weight: normal;
+  font-style: normal;
+  font-display: swap;
+}
+
+/* HEADING XL - Hero/Emphasis (Railroad Gothic CC, UPPERCASE) */
+.heading-xl-hero {
+  font-family: 'Railroad Gothic CC', 'Inter Tight', sans-serif;
+  font-size: 84px;
+  line-height: 0.95;
+  letter-spacing: -0.04em;
+  text-transform: uppercase;
+  color: #000000;
+  margin: 0;
+}
+
+/* HEADING XL - Standard (Inter Regular, lowercase) */
+.heading-xl {
+  font-family: 'Inter Tight', -apple-system, BlinkMacSystemFont, sans-serif;
+  font-size: 84px;
+  line-height: 0.95;
+  letter-spacing: -0.04em;
+  text-transform: lowercase;
+  color: #000000;
+  margin: 0;
+}
+
+/* HEADING LG - Subsection Titles */
+.heading-lg {
+  font-family: 'Inter Tight', -apple-system, BlinkMacSystemFont, sans-serif;
+  font-size: 48px;
+  line-height: 1.1;
+  letter-spacing: -0.03em;
+  color: var(--ct-text-primary-light);
+  margin: 0;
+}
+
+/* HEADING MD - Card Titles */
+.heading-md {
+  font-family: 'Inter Tight', -apple-system, BlinkMacSystemFont, sans-serif;
+  font-size: 28px;
+  font-weight: 500;
+  line-height: 1.2;
+  letter-spacing: -0.02em;
+  color: var(--ct-text-primary-light);
+  margin: 0;
+}
+
+/* BODY LG - Instructions & Explanations */
+.body-lg {
+  font-family: 'Inter Tight', -apple-system, BlinkMacSystemFont, sans-serif;
+  font-size: 18px;
+  font-weight: 400;
+  line-height: 1.6;
+  letter-spacing: -0.01em;
+  color: var(--ct-text-primary-light);
+  margin: 0;
+}
+
+/* BODY MD - Default Text */
+.body-md {
+  font-family: 'Inter Tight', -apple-system, BlinkMacSystemFont, sans-serif;
+  font-size: 16px;
+  font-weight: 400;
+  line-height: 1.6;
+  letter-spacing: -0.01em;
+  color: var(--ct-text-primary-light);
+  margin: 0;
+}
+
+/* BODY SM - Secondary Text & Hints */
+.body-sm {
+  font-family: 'Inter Tight', -apple-system, BlinkMacSystemFont, sans-serif;
+  font-size: 14px;
+  font-weight: 400;
+  line-height: 1.7;
+  letter-spacing: -0.01em;
+  color: var(--ct-text-secondary-light);
+  margin: 0;
+}
+
+/* COLLOQUIAL EMPHASIS */
+.emphasis-key {
+  font-weight: 500;
+  color: var(--ct-text-primary-light);
+}
+
+.emphasis-colloquial {
+  font-style: italic;
+  color: var(--ct-primary);
+  font-weight: 400;
+}
+
+/* ============================================
+   BUTTON SYSTEM
+   ============================================ */
+
+/* Base Button */
+.ct-btn {
+  font-family: 'Inter Tight', -apple-system, BlinkMacSystemFont, sans-serif;
+  font-size: 16px;
+  font-weight: 500;
+  letter-spacing: -0.01em;
+  border: none;
+  cursor: pointer;
+  transition: all 0.2s ease;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  gap: 8px;
+}
+
+/* Button Size - Large */
+.ct-btn-lg {
+  padding: 16px 40px;
+  border-radius: var(--ct-radius-full);
+  font-size: 18px;
+}
+
+/* Button Size - Medium */
+.ct-btn-md {
+  padding: 12px 32px;
+  border-radius: var(--ct-radius-full);
+  font-size: 16px;
+}
+
+/* Button Size - Small */
+.ct-btn-sm {
+  padding: 10px 24px;
+  border-radius: var(--ct-radius-full);
+  font-size: 14px;
+}
+
+/* Button Fill - Primary (Default State) */
+.ct-btn-primary {
+  background: var(--ct-success);
+  color: var(--ct-text-primary-on-success);
+  box-shadow: var(--ct-shadow-pill-sm);
+}
+
+.ct-btn-primary:hover {
+  background: #c9f5de;
+  box-shadow: var(--ct-shadow-pill-md);
+  transform: translateY(-1px);
+}
+
+.ct-btn-primary:active,
+.ct-btn-primary.pressed {
+  background: var(--ct-primary);
+  color: white;
+  box-shadow: var(--ct-shadow-glow-primary);
+  transform: translateY(0);
+}
+
+/* Button Fill - Warning (for tension moments) */
+.ct-btn-warning {
+  background: var(--ct-warning);
+  color: white;
+  box-shadow: var(--ct-shadow-pill-sm);
+}
+
+.ct-btn-warning:hover {
+  background: #ff6b35;
+  box-shadow: var(--ct-shadow-pill-md);
+  transform: translateY(-1px);
+}
+
+/* Icon Button (Circular) */
+.ct-btn-icon {
+  width: 48px;
+  height: 48px;
+  padding: 0;
+  border-radius: 50%;
+  background: var(--ct-success);
+  color: var(--ct-text-primary-on-success);
+  box-shadow: var(--ct-shadow-pill-sm);
+}
+
+.ct-btn-icon:hover {
+  background: #c9f5de;
+  box-shadow: var(--ct-shadow-glow-success);
+}
+
+/* ============================================
+   CARD SYSTEM
+   ============================================ */
+
+.ct-card {
+  background: var(--ct-bg-elevated);
+  border-radius: var(--ct-radius-lg);
+  padding: var(--ct-space-lg);
+  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.08);
+  transition: all 0.3s ease;
+}
+
+.ct-card:hover {
+  box-shadow: 0 4px 16px rgba(0, 0, 0, 0.12);
+  transform: translateY(-2px);
+}
+
+/* Card - Highlight (Important Info) */
+.ct-card-highlight {
+  background: rgba(61, 92, 255, 0.05);
+  border: 2px solid var(--ct-primary);
+}
+
+/* Card - Warning (Tension Alert) */
+.ct-card-warning {
+  background: rgba(255, 80, 16, 0.05);
+  border: 2px solid var(--ct-warning);
+}
+
+/* Card - Success (Completion) */
+.ct-card-success {
+  background: rgba(224, 255, 241, 0.15);
+  border: 2px solid var(--ct-success);
+}
+
+/* ============================================
+   FORM ELEMENTS
+   ============================================ */
+
+/* Text Input */
+.ct-input-text {
+  font-family: 'Inter Tight', -apple-system, BlinkMacSystemFont, sans-serif;
+  font-size: 16px;
+  letter-spacing: -0.01em;
+  padding: 14px 16px;
+  border: 2px solid #e0e7ff;
+  border-radius: var(--ct-radius-sm);
+  background: var(--ct-bg-elevated);
+  color: var(--ct-text-primary-light);
+  transition: all 0.2s ease;
+  width: 100%;
+  box-sizing: border-box;
+}
+
+.ct-input-text:focus {
+  border-color: var(--ct-primary);
+  outline: none;
+  box-shadow: 0 0 0 4px rgba(61, 92, 255, 0.1);
+}
+
+.ct-input-text::placeholder {
+  color: var(--ct-text-secondary-light);
+}
+
+/* Textarea */
+.ct-textarea {
+  font-family: 'Inter Tight', -apple-system, BlinkMacSystemFont, sans-serif;
+  font-size: 16px;
+  line-height: 1.6;
+  letter-spacing: -0.01em;
+  padding: 16px;
+  border: 2px solid #e0e7ff;
+  border-radius: var(--ct-radius-md);
+  background: var(--ct-bg-elevated);
+  color: var(--ct-text-primary-light);
+  resize: vertical;
+  min-height: 120px;
+  transition: all 0.2s ease;
+  width: 100%;
+  box-sizing: border-box;
+}
+
+.ct-textarea:focus {
+  border-color: var(--ct-primary);
+  outline: none;
+  box-shadow: 0 0 0 4px rgba(61, 92, 255, 0.1);
+}
+
+/* ============================================
+   PROGRESS SYSTEM
+   ============================================ */
+
+.ct-progress-bar {
+  width: 100%;
+  height: 12px;
+  background: #e0e7ff;
+  border-radius: var(--ct-radius-sm);
+  overflow: hidden;
+  position: relative;
+}
+
+.ct-progress-fill {
+  height: 100%;
+  background: var(--ct-gradient-primary);
+  transition: width 0.5s ease;
+  border-radius: var(--ct-radius-sm);
+}
+
+.ct-progress-label {
+  font-size: 14px;
+  font-weight: 500;
+  letter-spacing: -0.01em;
+  color: var(--ct-text-secondary-light);
+  margin-top: 8px;
+}
+
+/* ============================================
+   WATERFALL STACK (Skill Categorization)
+   ============================================ */
+
+.ct-waterfall-stack {
+  display: flex;
+  flex-direction: column;
+  gap: 0;
+}
+
+.ct-bucket-level {
+  position: relative;
+  min-height: 120px;
+  padding: var(--ct-space-md);
+  transition: all 0.3s ease;
+}
+
+.ct-bucket-level-1 {
+  background: linear-gradient(135deg, rgba(224, 255, 241, 0.25) 0%, rgba(224, 255, 241, 0.1) 100%);
+  border: 2px solid var(--ct-success);
+  border-radius: var(--ct-radius-lg) var(--ct-radius-lg) 0 0;
+  z-index: 3;
+  box-shadow: 0 4px 12px rgba(224, 255, 241, 0.3);
+}
+
+.ct-bucket-level-2 {
+  background: linear-gradient(135deg, rgba(61, 92, 255, 0.15) 0%, rgba(61, 92, 255, 0.05) 100%);
+  border: 2px solid var(--ct-primary);
+  border-top: none;
+  z-index: 2;
+  box-shadow: 0 4px 12px rgba(61, 92, 255, 0.2);
+  margin-top: -2px;
+}
+
+.ct-bucket-level-3 {
+  background: linear-gradient(135deg, rgba(114, 124, 157, 0.15) 0%, rgba(114, 124, 157, 0.05) 100%);
+  border: 2px solid var(--ct-text-secondary-light);
+  border-top: none;
+  border-radius: 0 0 var(--ct-radius-lg) var(--ct-radius-lg);
+  z-index: 1;
+  box-shadow: 0 4px 12px rgba(114, 124, 157, 0.15);
+  margin-top: -2px;
+}
+
+/* ============================================
+   EDITABLE TERMS (Inline Corrections)
+   ============================================ */
+
+.ct-editable-term {
+  background: rgba(61, 92, 255, 0.15);
+  padding: 3px 8px;
+  border-radius: var(--ct-radius-xs);
+  cursor: pointer;
+  transition: all 0.2s ease;
+  display: inline-block;
+  font-weight: 500;
+}
+
+.ct-editable-term:hover {
+  background: rgba(61, 92, 255, 0.25);
+  transform: translateY(-1px);
+  box-shadow: 0 2px 6px rgba(61, 92, 255, 0.2);
+}
+
+/* ============================================
+   UTILITY CLASSES
+   ============================================ */
+
+/* Spacing Utilities */
+.ct-mt-xs { margin-top: var(--ct-space-xs); }
+.ct-mt-sm { margin-top: var(--ct-space-sm); }
+.ct-mt-md { margin-top: var(--ct-space-md); }
+.ct-mt-lg { margin-top: var(--ct-space-lg); }
+.ct-mt-xl { margin-top: var(--ct-space-xl); }
+
+.ct-mb-xs { margin-bottom: var(--ct-space-xs); }
+.ct-mb-sm { margin-bottom: var(--ct-space-sm); }
+.ct-mb-md { margin-bottom: var(--ct-space-md); }
+.ct-mb-lg { margin-bottom: var(--ct-space-lg); }
+.ct-mb-xl { margin-bottom: var(--ct-space-xl); }
+
+.ct-p-xs { padding: var(--ct-space-xs); }
+.ct-p-sm { padding: var(--ct-space-sm); }
+.ct-p-md { padding: var(--ct-space-md); }
+.ct-p-lg { padding: var(--ct-space-lg); }
+.ct-p-xl { padding: var(--ct-space-xl); }
+
+/* Text Alignment */
+.ct-text-left { text-align: left; }
+.ct-text-center { text-align: center; }
+.ct-text-right { text-align: right; }
+
+/* Display */
+.ct-flex { display: flex; }
+.ct-flex-col { flex-direction: column; }
+.ct-items-center { align-items: center; }
+.ct-justify-center { justify-content: center; }
+.ct-gap-sm { gap: var(--ct-space-sm); }
+.ct-gap-md { gap: var(--ct-space-md); }
+
+/* ============================================
+   RESPONSIVE TYPOGRAPHY
+   ============================================ */
+
+@media (max-width: 768px) {
+  .heading-xl-hero,
+  .heading-xl {
+    font-size: 48px;
+    line-height: 1;
+  }
+
+  .heading-lg {
+    font-size: 32px;
+    line-height: 1.15;
+  }
+
+  .heading-md {
+    font-size: 22px;
+  }
+}
+
+@media (max-width: 480px) {
+  .heading-xl-hero,
+  .heading-xl {
+    font-size: 36px;
+  }
+
+  .heading-lg {
+    font-size: 26px;
+  }
+}
+
+/* ============================================
+   VOICE RULES (Critical - Do Not Violate)
+   ============================================ */
+
+/*
+NEVER USE EM DASHES (-) IN CONTENT
+Always use hyphens (-) instead
+
+Example:
+  "Your salary is $150k - that's your target"
+  "Your salary is $150k - that's your target"
+
+This keeps the voice human and casual.
+
+BRAND VOICE VOCABULARY:
+- Say "dealbreakers" not "priorities"
+- Say "eat dirt number" not "optimal target"
+- Say "make-or-break" not "critical success factor"
+- Keep it direct, casual, occasionally profane
+*/
