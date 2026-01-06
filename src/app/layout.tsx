@@ -1,9 +1,9 @@
 // app/layout.tsx
 import Providers from './providers';
 import './globals.css';
-import { Inter_Tight } from 'next/font/google';
+import { Inter } from 'next/font/google';
 
-const interTight = Inter_Tight({ 
+const inter = Inter({
   subsets: ['latin'],
   display: 'swap',
 });
@@ -20,7 +20,7 @@ export default function RootLayout({
 }) {
   return (
     <html lang="en">
-      <body suppressHydrationWarning className={interTight.className}>
+      <body suppressHydrationWarning className={inter.className}>
         <Providers>
           {children}
         </Providers>

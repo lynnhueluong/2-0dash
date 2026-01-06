@@ -12,7 +12,7 @@ module.exports = {
       colors: {
       },
       fontFamily: {
-        sans: ['Inter Tight', 'sans-serif'],
+        sans: ['Inter', 'system-ui', '-apple-system', 'sans-serif'],
       },
     },
   },
