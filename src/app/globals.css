@@ -1,67 +1,243 @@
 @tailwind base;
 @tailwind components;
 @tailwind utilities;
- 
+
+/* Import Career Translator Brand System */
+@import '../../styles/translation.css';
+
+/* Google Fonts - Inter */
+@import url('https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap');
+
 @layer base {
   :root {
+    /* Career Translator Brand Colors */
+    --ct-primary: #3d6aff;
+    --ct-success: #e0fff1;
+    --ct-warning: #ff5010;
+    --ct-bg-neutral: #f7faff;
+    --ct-bg-elevated: #fbfff5;
+    --ct-text-primary: #0b101f;
+    --ct-text-secondary: #727c9d;
+
+    /* Gradient */
+    --ct-gradient: linear-gradient(135deg, #3d6aff 0%, #e0fff1 100%);
+
+    /* Shadows */
+    --ct-shadow-pill: inset 0 -2px 4px rgba(0, 0, 0, 0.1), 0 2px 8px rgba(61, 92, 255, 0.15);
+    --ct-shadow-glow: 0 0 20px rgba(61, 92, 255, 0.6), 0 0 40px rgba(61, 92, 255, 0.3);
+
+    /* Original shadcn variables */
     --background: 0 0% 100%;
     --foreground: 222.2 84% 4.9%;
 
     --card: 0 0% 100%;
     --card-foreground: 222.2 84% 4.9%;
- 
+
     --popover: 0 0% 100%;
     --popover-foreground: 222.2 84% 4.9%;
- 
+
     --primary: 222.2 47.4% 11.2%;
     --primary-foreground: 210 40% 98%;
- 
+
     --secondary: 210 40% 96.1%;
     --secondary-foreground: 222.2 47.4% 11.2%;
- 
+
     --muted: 210 40% 96.1%;
     --muted-foreground: 215.4 16.3% 46.9%;
- 
+
     --accent: 210 40% 96.1%;
     --accent-foreground: 222.2 47.4% 11.2%;
- 
+
     --destructive: 0 84.2% 60.2%;
     --destructive-foreground: 210 40% 98%;
 
     --border: 214.3 31.8% 91.4%;
     --input: 214.3 31.8% 91.4%;
     --ring: 222.2 84% 4.9%;
- 
+
     --radius: 0.5rem;
   }
- 
+
   .dark {
     --background: 222.2 84% 4.9%;
     --foreground: 210 40% 98%;
- 
+
     --card: 222.2 84% 4.9%;
     --card-foreground: 210 40% 98%;
- 
+
     --popover: 222.2 84% 4.9%;
     --popover-foreground: 210 40% 98%;
- 
+
     --primary: 210 40% 98%;
     --primary-foreground: 222.2 47.4% 11.2%;
- 
+
     --secondary: 217.2 32.6% 17.5%;
     --secondary-foreground: 210 40% 98%;
- 
+
     --muted: 217.2 32.6% 17.5%;
     --muted-foreground: 215 20.2% 65.1%;
- 
+
     --accent: 217.2 32.6% 17.5%;
     --accent-foreground: 210 40% 98%;
- 
+
     --destructive: 0 62.8% 30.6%;
     --destructive-foreground: 210 40% 98%;
- 
+
     --border: 217.2 32.6% 17.5%;
     --input: 217.2 32.6% 17.5%;
     --ring: 212.7 26.8% 83.9%;
+  }
+
+  /* Apply base font */
+  body {
+    font-family: 'Inter', -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
+    -webkit-font-smoothing: antialiased;
+    -moz-osx-font-smoothing: grayscale;
+  }
+}
+
+@layer components {
+  /* Career Translator specific components */
+  .ct-btn {
+    @apply inline-flex items-center justify-center gap-2 rounded-full font-medium transition-all;
+    font-family: 'Inter', sans-serif;
+  }
+
+  .ct-btn-primary {
+    background: var(--ct-success);
+    color: var(--ct-text-primary);
+    box-shadow: var(--ct-shadow-pill);
+  }
+
+  .ct-btn-primary:hover {
+    background: #c9f5de;
+    transform: translateY(-1px);
+  }
+
+  .ct-btn-primary:active {
+    background: var(--ct-primary);
+    color: white;
+    box-shadow: var(--ct-shadow-glow);
+    transform: translateY(0);
+  }
+
+  .ct-card {
+    @apply rounded-2xl p-6 transition-all;
+    background: var(--ct-bg-elevated);
+    box-shadow: 0 2px 8px rgba(0, 0, 0, 0.08);
+  }
+
+  .ct-card:hover {
+    box-shadow: 0 4px 16px rgba(0, 0, 0, 0.12);
+    transform: translateY(-2px);
+  }
+
+  .ct-input {
+    @apply w-full rounded-lg border-2 px-4 py-3 transition-all;
+    font-family: 'Inter', sans-serif;
+    border-color: #e0e7ff;
+    background: var(--ct-bg-elevated);
+  }
+
+  .ct-input:focus {
+    border-color: var(--ct-primary);
+    outline: none;
+    box-shadow: 0 0 0 4px rgba(61, 92, 255, 0.1);
+  }
+
+  .ct-textarea {
+    @apply w-full rounded-xl border-2 px-4 py-4 transition-all resize-none;
+    font-family: 'Inter', sans-serif;
+    border-color: #e0e7ff;
+    background: var(--ct-bg-elevated);
+    line-height: 1.6;
+  }
+
+  .ct-textarea:focus {
+    border-color: var(--ct-primary);
+    outline: none;
+    box-shadow: 0 0 0 4px rgba(61, 92, 255, 0.1);
+  }
+}
+
+@layer utilities {
+  /* Career Translator text styles */
+  .ct-heading-xl {
+    font-family: 'Inter', sans-serif;
+    font-size: clamp(48px, 10vw, 84px);
+    line-height: 1.1;
+    letter-spacing: -0.03em;
+    font-weight: 400;
+  }
+
+  .ct-heading-lg {
+    font-family: 'Inter', sans-serif;
+    font-size: 36px;
+    line-height: 1.2;
+    letter-spacing: -0.02em;
+    font-weight: 500;
+  }
+
+  .ct-heading-md {
+    font-family: 'Inter', sans-serif;
+    font-size: 24px;
+    line-height: 1.3;
+    letter-spacing: -0.01em;
+    font-weight: 500;
+  }
+
+  .ct-body-lg {
+    font-family: 'Inter', sans-serif;
+    font-size: 18px;
+    line-height: 1.6;
+    font-weight: 400;
+  }
+
+  .ct-body-md {
+    font-family: 'Inter', sans-serif;
+    font-size: 16px;
+    line-height: 1.6;
+    font-weight: 400;
+  }
+
+  .ct-body-sm {
+    font-family: 'Inter', sans-serif;
+    font-size: 14px;
+    line-height: 1.6;
+    font-weight: 400;
+  }
+
+  /* Background utilities */
+  .ct-bg-neutral {
+    background-color: var(--ct-bg-neutral);
+  }
+
+  .ct-bg-elevated {
+    background-color: var(--ct-bg-elevated);
+  }
+
+  .ct-bg-gradient {
+    background: var(--ct-gradient);
+  }
+
+  /* Text color utilities */
+  .ct-text-primary {
+    color: var(--ct-text-primary);
+  }
+
+  .ct-text-secondary {
+    color: var(--ct-text-secondary);
+  }
+
+  .ct-text-brand {
+    color: var(--ct-primary);
+  }
+
+  .ct-text-success {
+    color: var(--ct-success);
+  }
+
+  .ct-text-warning {
+    color: var(--ct-warning);
   }
 }
