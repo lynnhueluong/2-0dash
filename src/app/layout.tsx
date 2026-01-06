@@ -1,12 +1,6 @@
 // app/layout.tsx
 import Providers from './providers';
 import './globals.css';
-import { Inter } from 'next/font/google';
-
-const inter = Inter({
-  subsets: ['latin'],
-  display: 'swap',
-});
 
 export const metadata = {
   title: '2.0 Dash',
@@ -20,7 +14,7 @@ export default function RootLayout({
 }) {
   return (
     <html lang="en">
-      <body suppressHydrationWarning className={inter.className}>
+      <body suppressHydrationWarning className="font-sans">
         <Providers>
           {children}
         </Providers>
