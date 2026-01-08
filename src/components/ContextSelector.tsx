@@ -77,7 +77,7 @@ export default function ContextSelector({
             lineHeight: '1.6',
           }}
         >
-          You've defined priorities for every piece of your portfolio.
+          You have defined priorities for every piece of your portfolio.
           Now we can synthesize everything and check for tensions.
         </p>
 
@@ -125,7 +125,7 @@ export default function ContextSelector({
         }}
       >
         Each piece of your portfolio has different dealbreakers.
-        Pick one to define priorities for - you'll do all of them.
+        Pick one to define priorities for - you will do all of them.
       </p>
       <p
         style={{

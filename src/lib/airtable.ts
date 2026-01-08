@@ -1,15 +1,25 @@
 import Airtable from 'airtable';
 
-// Initialize Airtable
-const base = new Airtable({ apiKey: process.env.AIRTABLE_API_KEY })
-  .base(process.env.AIRTABLE_BASE_ID || 'appXmkamVKmDfjJG1');
+// Lazy initialization to avoid build-time errors
+let _base: ReturnType<typeof Airtable.prototype.base> | null = null;
 
-// Table references
+function getBase() {
+  if (!_base) {
+    if (!process.env.AIRTABLE_API_KEY) {
+      throw new Error('AIRTABLE_API_KEY is not set');
+    }
+    _base = new Airtable({ apiKey: process.env.AIRTABLE_API_KEY })
+      .base(process.env.AIRTABLE_BASE_ID || 'appXmkamVKmDfjJG1');
+  }
+  return _base;
+}
+
+// Table references - use functions to defer initialization
 export const Tables = {
-  Users: base('Users'),
-  Submissions: base('Submissions'),
-  Generations: base('Generations'),
-  UserPreferences: base('User_Preferences'),
+  get Users() { return getBase()('Users'); },
+  get Submissions() { return getBase()('Submissions'); },
+  get Generations() { return getBase()('Generations'); },
+  get UserPreferences() { return getBase()('User_Preferences'); },
 } as const;
 
 // Types for Career Translator
@@ -329,4 +339,4 @@ export function detectTensions(preferences: Preference[]): Tension[] {
   return tensions;
 }
 
-export default base;
+export default getBase;

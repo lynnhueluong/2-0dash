@@ -301,7 +301,7 @@ export default function EventRecommendations({
               marginBottom: '16px',
             }}
           >
-            Come back here and we'll ask you a few questions. Sometimes events change how you think about your priorities - and that's valuable data.
+            Come back here and we will ask you a few questions. Sometimes events change how you think about your priorities - and that is valuable data.
           </p>
           <button
             onClick={() => setShowReflection(true)}
@@ -418,7 +418,7 @@ export default function EventRecommendations({
                         color: '#727c9d',
                       }}
                     >
-                      No, they're still accurate
+                      No, they are still accurate
                     </button>
                     <button
                       className="flex-1 py-3 rounded-lg"

@@ -520,7 +520,7 @@ export default function PortfolioInventory({
               }}
             >
               Dump everything here - your day job, side projects, advisory gigs, teaching,
-              creative work, whatever. We'll sort it out together. No filter, no editing.
+              creative work, whatever. We will sort it out together. No filter, no editing.
             </p>
 
             <div className="relative mb-6">

@@ -47,7 +47,7 @@ const bucketConfig = {
   },
   notPlanning: {
     title: "NOT PLANNING TO GET",
-    subtitle: "Skills that aren\'t worth your time right now',
+    subtitle: "Skills that aren't worth your time right now",
     color: '#727c9d',
     borderColor: '#727c9d',
     textColor: '#727c9d',
@@ -329,7 +329,7 @@ export default function WaterfallStack({
               color: '#727c9d',
             }}
           >
-            Drag each skill into one of the three buckets below. Be honest - if you don't have it and don't plan to get it, that's valuable information.
+            Drag each skill into one of the three buckets below. Be honest - if you do not have it and do not plan to get it, that is valuable information.
           </p>
 
           <div className="flex flex-wrap gap-2">

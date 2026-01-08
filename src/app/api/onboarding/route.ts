@@ -1,11 +1,7 @@
 import { NextRequest, NextResponse } from 'next/server';
 import { getSession } from '@auth0/nextjs-auth0';
-import Airtable from 'airtable';
 
 export const dynamic = 'force-dynamic';
-
-const base = new Airtable({ apiKey: process.env.AIRTABLE_API_KEY })
-  .base(process.env.AIRTABLE_BASE_ID!);
 
 export async function GET(req: Request) {
   try {

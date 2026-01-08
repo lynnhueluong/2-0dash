@@ -125,7 +125,7 @@ export default function TensionConfrontation({
             color: '#727c9d',
           }}
         >
-          Your priorities seem aligned. That's rare - nice work being clear about what you want.
+          Your priorities seem aligned. That is rare - nice work being clear about what you want.
         </p>
       </div>
     );
@@ -161,7 +161,7 @@ export default function TensionConfrontation({
             }}
           >
             We found {tensions.length} conflict{tensions.length !== 1 ? 's' : ''} in your priorities.
-            You can't skip these - that's the whole point.
+            You cannot skip these - that is the whole point.
           </p>
         </div>
       </div>
@@ -419,7 +419,7 @@ export default function TensionConfrontation({
                   marginBottom: '4px',
                 }}
               >
-                You can't skip this
+                You cannot skip this
               </p>
               <p
                 style={{

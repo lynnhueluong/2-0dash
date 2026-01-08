@@ -1,7 +1,7 @@
 import { NextRequest, NextResponse } from 'next/server';
 import { getSession } from '@auth0/nextjs-auth0';
 import Anthropic from '@anthropic-ai/sdk';
-import { getSubmissionByUserId, getPreferencesBySubmission, updateSubmission } from '@/lib/airtable';
+import { getSubmissionByUserId, getPreferencesBySubmission, updateSubmission, Submission, Preference } from '@/lib/airtable';
 
 export const dynamic = 'force-dynamic';
 
@@ -117,7 +117,7 @@ interface SubmissionContext {
   braindump: string;
 }
 
-function buildContext(submission: typeof import('@/lib/airtable').Submission extends infer T ? T : never, preferences: Array<typeof import('@/lib/airtable').Preference extends infer T ? T : never>): SubmissionContext {
+function buildContext(submission: Submission, preferences: Preference[]): SubmissionContext {
   return {
     portfolioPieces: (submission.portfolio_pieces || []).map(p => ({
       name: p.name,
