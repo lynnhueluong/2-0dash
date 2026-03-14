@@ -156,7 +156,11 @@ export function ChatInterface({
         try {
           const newNodes = JSON.parse(nodesText.trim())
           if (Array.isArray(newNodes)) onNodesUpdate(newNodes)
-        } catch { /* ignore */ }
+        } catch (e) {
+          console.error('[nodes] parse failed:', e, 'raw:', nodesText.trim().slice(0, 200))
+        }
+      } else if (onNodesUpdate) {
+        console.log('[nodes] no nodes text found, seenSeparator:', seenSeparator, 'nodesText len:', nodesText.length)
       }
 
       // Update progress
