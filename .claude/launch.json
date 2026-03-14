@@ -1,0 +1,11 @@
+{
+  "version": "0.0.1",
+  "configurations": [
+    {
+      "name": "2-0dash",
+      "runtimeExecutable": "sh",
+      "runtimeArgs": ["-c", "cd 2-0dash && npm run dev"],
+      "port": 3000
+    }
+  ]
+}

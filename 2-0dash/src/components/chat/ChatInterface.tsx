@@ -4,7 +4,7 @@ import { useState, useRef, useEffect, useCallback } from 'react'
 import { Mic, MicOff, Send, Loader2 } from 'lucide-react'
 import { VoiceRecognition } from '@/lib/voice'
 import { cn } from '@/lib/utils'
-import type { ChatMessage, UserStage, AmbitionProfile, ConversationMessage } from '@/lib/types'
+import type { ChatMessage, UserStage, AmbitionProfile, ConversationMessage, ThoughtNode } from '@/lib/types'
 
 interface ChatInterfaceProps {
   stage: UserStage
@@ -13,7 +13,10 @@ interface ChatInterfaceProps {
   progress: number
   initialMessage: string
   profile?: Partial<AmbitionProfile>
+  showHeader?: boolean
   onStageComplete?: (conversationHistory: ConversationMessage[]) => void
+  onNodesUpdate?: (nodes: ThoughtNode[]) => void
+  onProgressChange?: (progress: number) => void
 }
 
 export function ChatInterface({
@@ -23,7 +26,10 @@ export function ChatInterface({
   progress,
   initialMessage,
   profile,
+  showHeader = true,
   onStageComplete,
+  onNodesUpdate,
+  onProgressChange,
 }: ChatInterfaceProps) {
   const [messages, setMessages] = useState<ChatMessage[]>([
     {
@@ -98,7 +104,9 @@ export function ChatInterface({
       if (!reader) throw new Error('No response body')
 
       const decoder = new TextDecoder()
-      let assistantText = ''
+      let displayText = ''    // text shown in chat (before ---NODES---)
+      let nodesText = ''      // JSON after ---NODES---
+      let seenSeparator = false
       const assistantId = Date.now().toString() + '-ai'
 
       // Replace typing indicator with streaming message
@@ -121,22 +129,43 @@ export function ChatInterface({
             try {
               const parsed = JSON.parse(data)
               if (parsed.text) {
-                assistantText += parsed.text
-                setMessages(prev => prev.map(m =>
-                  m.id === assistantId ? { ...m, content: assistantText } : m
-                ))
+                if (!seenSeparator) {
+                  const accumulated = displayText + parsed.text
+                  const sepIdx = accumulated.indexOf('---NODES---')
+                  if (sepIdx >= 0) {
+                    seenSeparator = true
+                    displayText = accumulated.slice(0, sepIdx).trimEnd()
+                    nodesText = accumulated.slice(sepIdx + 11)
+                  } else {
+                    displayText = accumulated
+                  }
+                  setMessages(prev => prev.map(m =>
+                    m.id === assistantId ? { ...m, content: displayText } : m
+                  ))
+                } else {
+                  nodesText += parsed.text
+                }
               }
             } catch { /* ignore parse errors */ }
           }
         }
       }
 
+      // Parse and emit nodes if found
+      if (nodesText.trim() && onNodesUpdate) {
+        try {
+          const newNodes = JSON.parse(nodesText.trim())
+          if (Array.isArray(newNodes)) onNodesUpdate(newNodes)
+        } catch { /* ignore */ }
+      }
+
       // Update progress
       const newProgress = Math.min(currentProgress + 5, 95)
       setCurrentProgress(newProgress)
+      onProgressChange?.(newProgress)
 
       // Check if AI is wrapping up (stage complete keywords)
-      const lowerText = assistantText.toLowerCase()
+      const lowerText = displayText.toLowerCase()
       const completeKeywords = ['stage complete', 'you\'re ready', 'let\'s move on', 'next stage', 'ready to move', 'wrapped up', 'all set for']
       if (completeKeywords.some(k => lowerText.includes(k)) && messages.length > 8) {
         setShowCompleteButton(true)
@@ -199,21 +228,23 @@ export function ChatInterface({
   return (
     <div className="flex flex-col h-full">
       {/* Stage Header */}
-      <div className="flex-shrink-0 px-4 py-3 border-b border-gray-200">
-        <div className="flex items-center justify-between mb-2">
-          <div className="flex items-center gap-2">
-            <span className="text-blue-600 font-mono text-xs">0{stageNumber}</span>
-            <span className="text-sm font-semibold">{stageLabel}</span>
+      {showHeader && (
+        <div className="flex-shrink-0 px-4 py-3 border-b border-gray-200">
+          <div className="flex items-center justify-between mb-2">
+            <div className="flex items-center gap-2">
+              <span className="text-blue-600 font-mono text-xs">0{stageNumber}</span>
+              <span className="text-sm font-semibold">{stageLabel}</span>
+            </div>
+            <span className="text-xs text-gray-500">{currentProgress}%</span>
           </div>
-          <span className="text-xs text-gray-500">{currentProgress}%</span>
+          <div className="w-full bg-gray-200 rounded-full h-1">
+            <div
+              className="progress-bar h-1 rounded-full transition-all duration-500"
+              style={{ width: `${currentProgress}%` }}
+            />
+          </div>
         </div>
-        <div className="w-full bg-gray-200 rounded-full h-1">
-          <div
-            className="progress-bar h-1 rounded-full transition-all duration-500"
-            style={{ width: `${currentProgress}%` }}
-          />
-        </div>
-      </div>
+      )}
 
       {/* Messages */}
       <div className="flex-1 overflow-y-auto px-4 py-4 space-y-4">

@@ -136,6 +136,22 @@ export interface ChatMessage {
   isTyping?: boolean
 }
 
+// Thought Map (Career Inventory visual)
+export type ThoughtNodeType =
+  | 'life_goal'
+  | 'situation'
+  | 'superpower'
+  | 'gap'
+  | 'lifestyle'
+  | 'direction'
+  | 'blocker'
+
+export interface ThoughtNode {
+  id: string
+  type: ThoughtNodeType
+  label: string
+}
+
 // API types
 export interface AIRequestBody {
   messages: ConversationMessage[]

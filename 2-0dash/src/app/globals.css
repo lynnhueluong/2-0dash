@@ -84,3 +84,8 @@ body {
 .progress-bar {
   background: linear-gradient(90deg, #1d4ed8 0%, #2563eb 100%);
 }
+
+/* Thought map node entrance */
+.thought-node {
+  animation: fadeSlideIn 0.35s ease-out forwards;
+}
