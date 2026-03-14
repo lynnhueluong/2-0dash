@@ -23,9 +23,13 @@ export function InventoryClient({ profile }: InventoryClientProps) {
 
   const handleNodesUpdate = useCallback((newNodes: ThoughtNode[]) => {
     setNodes(prev => {
-      // Merge: new nodes overwrite existing ones with same id, append new ones
+      // Deduplicate by ID and by type+label (AI sometimes re-emits same content with different IDs)
       const existingIds = new Set(prev.map(n => n.id))
-      const incoming = newNodes.filter(n => !existingIds.has(n.id))
+      const existingKeys = new Set(prev.map(n => `${n.type}::${n.label.toLowerCase().trim()}`))
+      const incoming = newNodes.filter(n =>
+        !existingIds.has(n.id) &&
+        !existingKeys.has(`${n.type}::${n.label.toLowerCase().trim()}`)
+      )
       return [...prev, ...incoming]
     })
   }, [])
