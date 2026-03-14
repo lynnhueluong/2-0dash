@@ -78,7 +78,6 @@ export async function streamAIResponse(
   const stream = new ReadableStream<string>({
     async start(controller) {
       try {
-        console.log('[streamAIResponse] Starting Anthropic stream, model: claude-opus-4-6, messages:', anthropicMessages.length)
         const params = {
           model: 'claude-opus-4-6',
           max_tokens: 4096,
@@ -87,17 +86,14 @@ export async function streamAIResponse(
         }
         const response = anthropic.messages.stream(params)
 
-        let textChunks = 0
         for await (const event of response) {
           if (
             event.type === 'content_block_delta' &&
             event.delta.type === 'text_delta'
           ) {
-            textChunks++
             controller.enqueue(event.delta.text)
           }
         }
-        console.log('[streamAIResponse] Stream complete, text chunks:', textChunks)
         controller.close()
       } catch (err) {
         console.error('[streamAIResponse] Error:', String(err), err instanceof Error ? err.stack : '')

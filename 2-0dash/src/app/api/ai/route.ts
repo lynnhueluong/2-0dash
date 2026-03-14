@@ -10,7 +10,6 @@ export const maxDuration = 60
 
 export async function POST(req: NextRequest) {
   try {
-    console.log('[AI Route] POST received')
     // Auth check
     const supabase = await createServerSupabaseClient()
     const { data: { user } } = await supabase.auth.getUser()
@@ -18,7 +17,6 @@ export async function POST(req: NextRequest) {
     if (!user) {
       return NextResponse.json({ error: 'Unauthorized' }, { status: 401 })
     }
-    console.log('[AI Route] Auth OK, user:', user.id)
 
     const body: AIRequestBody = await req.json()
     const { messages, stage, profile } = body
@@ -26,7 +24,6 @@ export async function POST(req: NextRequest) {
     if (!messages || !stage) {
       return NextResponse.json({ error: 'Missing messages or stage' }, { status: 400 })
     }
-    console.log('[AI Route] stage:', stage, 'messages count:', messages.length)
 
     // Save/update session in database (non-blocking — DB errors must not kill the AI response)
     try {
@@ -38,32 +35,25 @@ export async function POST(req: NextRequest) {
         last_active_at: new Date().toISOString(),
       }, { onConflict: 'user_id,stage' })
       if (dbError) console.error('[Sessions upsert error]', dbError)
-      else console.log('[AI Route] Session saved OK')
     } catch (dbErr) {
       console.error('[Sessions upsert error]', dbErr)
     }
 
     // Stream from Claude
-    console.log('[AI Route] Calling streamAIResponse...')
     const aiStream = await streamAIResponse(messages, stage, profile)
-    console.log('[AI Route] Got aiStream, building response...')
 
     const encoder = new TextEncoder()
     const readableStream = new ReadableStream({
       async start(controller) {
-        console.log('[AI Route] ReadableStream start, reading from aiStream...')
         const reader = aiStream.getReader()
         try {
-          let chunkCount = 0
           while (true) {
             const { done, value } = await reader.read()
             if (done) {
-              console.log('[AI Route] Stream done, total chunks:', chunkCount)
               controller.enqueue(encoder.encode('data: [DONE]\n\n'))
               controller.close()
               break
             }
-            chunkCount++
             controller.enqueue(encoder.encode(`data: ${JSON.stringify({ text: value })}\n\n`))
           }
         } catch (err) {
