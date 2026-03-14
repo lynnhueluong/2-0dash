@@ -23,7 +23,7 @@ export default async function DefinePage() {
     .single()
 
   return (
-    <div className="h-full flex flex-col">
+    <div className="flex flex-col h-screen">
       <InventoryClient
         profile={profile}
         savedHistory={session?.conversation_history}
