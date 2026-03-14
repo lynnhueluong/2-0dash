@@ -130,12 +130,20 @@ After confirmation, signal completion:
 - `blocker` — something in the way of their goals
 
 **Rules:**
-- Output ONLY nodes you just learned in THIS exchange (no repeats)
+- **ALWAYS output `---NODES---` after EVERY response — no exceptions**
+- Output nodes for everything you learned in THIS exchange (new info only, no repeats from prior exchanges)
+- If genuinely nothing new was learned, output an empty array: `---NODES---\n[]`
 - Labels are specific and concise — 2-5 words, no filler
 - IDs are unique, descriptive strings (e.g., `goal_parents_house`, `skill_backend`)
 - Put this section AFTER your conversational reply, never before
-- If nothing new was learned this exchange, omit `---NODES---` entirely
 - This section is hidden from the member — it builds their visual thought map
+
+**What to extract per exchange:**
+- Exchange 1: `life_goal` nodes (personal + career goals), initial `situation` and `blocker` nodes if mentioned
+- Exchange 2: additional `situation` and `blocker` nodes from what they describe
+- Exchange 3: `superpower` nodes — one node per skill/strength they name
+- Exchange 4: `gap` nodes for each gap named, `lifestyle` nodes for work preferences
+- Exchange 5: `direction` node(s) for where they're headed
 
 **Example (what a correctly formatted response looks like):**
 
