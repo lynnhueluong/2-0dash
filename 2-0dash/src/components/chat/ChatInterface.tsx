@@ -199,15 +199,15 @@ export function ChatInterface({
   return (
     <div className="flex flex-col h-full">
       {/* Stage Header */}
-      <div className="flex-shrink-0 px-4 py-3 border-b border-[#2A2A2A]">
+      <div className="flex-shrink-0 px-4 py-3 border-b border-gray-200">
         <div className="flex items-center justify-between mb-2">
           <div className="flex items-center gap-2">
-            <span className="text-[#D4AF37] font-mono text-xs">0{stageNumber}</span>
+            <span className="text-blue-600 font-mono text-xs">0{stageNumber}</span>
             <span className="text-sm font-semibold">{stageLabel}</span>
           </div>
-          <span className="text-xs text-[#6B6B6B]">{currentProgress}%</span>
+          <span className="text-xs text-gray-500">{currentProgress}%</span>
         </div>
-        <div className="w-full bg-[#2A2A2A] rounded-full h-1">
+        <div className="w-full bg-gray-200 rounded-full h-1">
           <div
             className="progress-bar h-1 rounded-full transition-all duration-500"
             style={{ width: `${currentProgress}%` }}
@@ -229,15 +229,15 @@ export function ChatInterface({
               className={cn(
                 'max-w-[85%] px-4 py-3 rounded-2xl text-sm leading-relaxed',
                 message.role === 'user'
-                  ? 'bg-[#D4AF37] text-[#0A0A0A] rounded-br-sm font-medium'
-                  : 'bg-[#1A1A1A] text-[#FAFAFA] rounded-bl-sm border border-[#2A2A2A]'
+                  ? 'bg-blue-600 text-white rounded-br-sm font-medium'
+                  : 'bg-gray-100 text-gray-900 rounded-bl-sm border border-gray-200'
               )}
             >
               {message.isTyping ? (
                 <div className="flex items-center gap-1 py-1 px-1">
-                  <span className="typing-dot w-2 h-2 bg-[#6B6B6B] rounded-full inline-block" />
-                  <span className="typing-dot w-2 h-2 bg-[#6B6B6B] rounded-full inline-block" />
-                  <span className="typing-dot w-2 h-2 bg-[#6B6B6B] rounded-full inline-block" />
+                  <span className="typing-dot w-2 h-2 bg-gray-400 rounded-full inline-block" />
+                  <span className="typing-dot w-2 h-2 bg-gray-400 rounded-full inline-block" />
+                  <span className="typing-dot w-2 h-2 bg-gray-400 rounded-full inline-block" />
                 </div>
               ) : (
                 <p className="whitespace-pre-wrap">{message.content}</p>
@@ -253,7 +253,7 @@ export function ChatInterface({
         <div className="flex-shrink-0 px-4 pb-2">
           <button
             onClick={handleComplete}
-            className="w-full py-3 bg-[#D4AF37] text-[#0A0A0A] font-bold rounded-xl hover:bg-[#F0D060] transition-colors"
+            className="w-full py-3 bg-blue-600 text-white font-bold rounded-xl hover:bg-blue-700 transition-colors"
           >
             I&apos;m ready — let&apos;s move to the next stage →
           </button>
@@ -263,20 +263,20 @@ export function ChatInterface({
       {/* Voice transcript preview */}
       {voiceTranscript && (
         <div className="flex-shrink-0 px-4 py-1">
-          <p className="text-xs text-[#6B6B6B] italic">{voiceTranscript}</p>
+          <p className="text-xs text-gray-500 italic">{voiceTranscript}</p>
         </div>
       )}
 
       {/* Input Area */}
-      <div className="flex-shrink-0 px-4 py-4 border-t border-[#2A2A2A]">
+      <div className="flex-shrink-0 px-4 py-4 border-t border-gray-200">
         <div className="flex items-end gap-2">
           <button
             onClick={toggleVoice}
             className={cn(
               'flex-shrink-0 p-3 rounded-xl transition-colors',
               isListening
-                ? 'bg-[#D4AF37] text-[#0A0A0A] voice-active'
-                : 'bg-[#1A1A1A] text-[#6B6B6B] hover:text-[#FAFAFA] border border-[#2A2A2A]'
+                ? 'bg-blue-600 text-white voice-active'
+                : 'bg-gray-100 text-gray-500 hover:text-gray-900 border border-gray-200'
             )}
             title={isListening ? 'Stop recording' : 'Start voice input'}
           >
@@ -290,7 +290,7 @@ export function ChatInterface({
             onKeyDown={handleKeyDown}
             placeholder="Type your answer, or hit the mic to speak..."
             rows={1}
-            className="flex-1 bg-[#1A1A1A] border border-[#2A2A2A] rounded-xl px-4 py-3 text-sm text-[#FAFAFA] placeholder-[#6B6B6B] resize-none focus:outline-none focus:border-[#D4AF37] transition-colors max-h-32 overflow-y-auto"
+            className="flex-1 bg-gray-100 border border-gray-200 rounded-xl px-4 py-3 text-sm text-gray-900 placeholder-gray-400 resize-none focus:outline-none focus:border-blue-600 transition-colors max-h-32 overflow-y-auto"
             style={{ height: 'auto' }}
             onInput={e => {
               const el = e.currentTarget
@@ -303,12 +303,12 @@ export function ChatInterface({
           <button
             onClick={() => sendMessage(input)}
             disabled={!input.trim() || isLoading}
-            className="flex-shrink-0 p-3 bg-[#D4AF37] text-[#0A0A0A] rounded-xl hover:bg-[#F0D060] disabled:opacity-40 disabled:cursor-not-allowed transition-colors"
+            className="flex-shrink-0 p-3 bg-blue-600 text-white rounded-xl hover:bg-blue-700 disabled:opacity-40 disabled:cursor-not-allowed transition-colors"
           >
             {isLoading ? <Loader2 size={18} className="animate-spin" /> : <Send size={18} />}
           </button>
         </div>
-        <p className="text-xs text-[#6B6B6B] mt-2 text-center">Enter to send · Shift+Enter for new line</p>
+        <p className="text-xs text-gray-500 mt-2 text-center">Enter to send · Shift+Enter for new line</p>
       </div>
     </div>
   )
