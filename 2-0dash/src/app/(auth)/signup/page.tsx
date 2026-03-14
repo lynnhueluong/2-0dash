@@ -58,8 +58,8 @@ export default function SignupPage() {
         <div className="max-w-md w-full text-center space-y-4">
           <div className="text-4xl">🎉</div>
           <h1 className="text-2xl font-bold">You&apos;re in. Almost.</h1>
-          <p className="text-[#6B6B6B]">
-            Check your email at <strong className="text-[#FAFAFA]">{email}</strong> and confirm your account. 
+          <p className="text-gray-500">
+            Check your email at <strong className="text-gray-900">{email}</strong> and confirm your account. 
             Then we&apos;ll get started on your Ambition Profile.
           </p>
         </div>
@@ -71,63 +71,63 @@ export default function SignupPage() {
     <div className="min-h-screen flex items-center justify-center px-4">
       <div className="max-w-md w-full space-y-8">
         <div className="text-center space-y-2">
-          <div className="text-[#D4AF37] font-mono text-sm tracking-widest uppercase">The 2.0 Collective</div>
+          <div className="text-blue-600 font-mono text-sm tracking-widest uppercase">The 2.0 Collective</div>
           <h1 className="text-3xl font-bold">Build your Ambition Profile.</h1>
-          <p className="text-[#6B6B6B]">
+          <p className="text-gray-500">
             This is your personal career data infrastructure. Let&apos;s build it right.
           </p>
         </div>
 
         <form onSubmit={handleSignup} className="space-y-4">
           <div className="space-y-2">
-            <label className="text-sm text-[#A0A0A0]">Your name</label>
+            <label className="text-sm text-gray-500">Your name</label>
             <input
               type="text"
               value={name}
               onChange={e => setName(e.target.value)}
               placeholder="First name is fine"
               required
-              className="w-full px-4 py-3 bg-[#141414] border border-[#2A2A2A] rounded-lg text-[#FAFAFA] placeholder-[#6B6B6B] focus:outline-none focus:border-[#D4AF37] transition-colors"
+              className="w-full px-4 py-3 bg-gray-50 border border-gray-200 rounded-lg text-gray-900 placeholder-gray-400 focus:outline-none focus:border-blue-600 transition-colors"
             />
           </div>
 
           <div className="space-y-2">
-            <label className="text-sm text-[#A0A0A0]">Email</label>
+            <label className="text-sm text-gray-500">Email</label>
             <input
               type="email"
               value={email}
               onChange={e => setEmail(e.target.value)}
               placeholder="you@example.com"
               required
-              className="w-full px-4 py-3 bg-[#141414] border border-[#2A2A2A] rounded-lg text-[#FAFAFA] placeholder-[#6B6B6B] focus:outline-none focus:border-[#D4AF37] transition-colors"
+              className="w-full px-4 py-3 bg-gray-50 border border-gray-200 rounded-lg text-gray-900 placeholder-gray-400 focus:outline-none focus:border-blue-600 transition-colors"
             />
           </div>
 
           <div className="space-y-2">
-            <label className="text-sm text-[#A0A0A0]">Password</label>
+            <label className="text-sm text-gray-500">Password</label>
             <input
               type="password"
               value={password}
               onChange={e => setPassword(e.target.value)}
               placeholder="8+ characters"
               required
-              className="w-full px-4 py-3 bg-[#141414] border border-[#2A2A2A] rounded-lg text-[#FAFAFA] placeholder-[#6B6B6B] focus:outline-none focus:border-[#D4AF37] transition-colors"
+              className="w-full px-4 py-3 bg-gray-50 border border-gray-200 rounded-lg text-gray-900 placeholder-gray-400 focus:outline-none focus:border-blue-600 transition-colors"
             />
           </div>
 
           <div className="space-y-2">
-            <label className="text-sm text-[#A0A0A0]">How&apos;d you find 2.0? <span className="text-[#6B6B6B]">(optional)</span></label>
+            <label className="text-sm text-gray-500">How&apos;d you find 2.0? <span className="text-gray-500">(optional)</span></label>
             <input
               type="text"
               value={referral}
               onChange={e => setReferral(e.target.value)}
               placeholder="Friend, social media, event..."
-              className="w-full px-4 py-3 bg-[#141414] border border-[#2A2A2A] rounded-lg text-[#FAFAFA] placeholder-[#6B6B6B] focus:outline-none focus:border-[#D4AF37] transition-colors"
+              className="w-full px-4 py-3 bg-gray-50 border border-gray-200 rounded-lg text-gray-900 placeholder-gray-400 focus:outline-none focus:border-blue-600 transition-colors"
             />
           </div>
 
           {error && (
-            <div className="px-4 py-3 bg-red-950/30 border border-red-800 rounded-lg text-red-400 text-sm">
+            <div className="px-4 py-3 bg-red-50 border border-red-300 rounded-lg text-red-600 text-sm">
               {error}
             </div>
           )}
@@ -135,15 +135,15 @@ export default function SignupPage() {
           <button
             type="submit"
             disabled={loading}
-            className="w-full py-3 bg-[#D4AF37] text-[#0A0A0A] font-bold rounded-lg hover:bg-[#F0D060] disabled:opacity-50 disabled:cursor-not-allowed transition-colors"
+            className="w-full py-3 bg-blue-600 text-white font-bold rounded-lg hover:bg-blue-700 disabled:opacity-50 disabled:cursor-not-allowed transition-colors"
           >
             {loading ? 'Creating your account...' : "Let's go →"}
           </button>
         </form>
 
-        <p className="text-center text-[#6B6B6B] text-sm">
+        <p className="text-center text-gray-500 text-sm">
           Already a member?{' '}
-          <Link href="/login" className="text-[#D4AF37] hover:underline">
+          <Link href="/login" className="text-blue-600 hover:underline">
             Sign in
           </Link>
         </p>

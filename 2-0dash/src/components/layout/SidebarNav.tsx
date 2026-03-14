@@ -41,8 +41,8 @@ export function SidebarNav({ user }: SidebarNavProps) {
             className={cn(
               'flex items-center gap-3 px-3 py-2.5 rounded-lg text-sm transition-colors',
               pathname === item.href
-                ? 'bg-[#D4AF37]/10 text-[#D4AF37]'
-                : 'text-[#6B6B6B] hover:text-[#FAFAFA] hover:bg-[#1A1A1A]'
+                ? 'bg-blue-600/10 text-blue-600'
+                : 'text-gray-500 hover:text-gray-900 hover:bg-gray-100'
             )}
           >
             <item.icon size={16} />
@@ -51,15 +51,15 @@ export function SidebarNav({ user }: SidebarNavProps) {
         ))}
       </div>
 
-      <div className="px-2 border-t border-[#2A2A2A] pt-4 space-y-1">
+      <div className="px-2 border-t border-gray-200 pt-4 space-y-1">
         {user && (
-          <div className="px-3 py-2 text-xs text-[#6B6B6B] truncate">
+          <div className="px-3 py-2 text-xs text-gray-500 truncate">
             {user.name || user.email}
           </div>
         )}
         <button
           onClick={handleSignOut}
-          className="w-full flex items-center gap-3 px-3 py-2.5 rounded-lg text-sm text-[#6B6B6B] hover:text-[#FAFAFA] hover:bg-[#1A1A1A] transition-colors"
+          className="w-full flex items-center gap-3 px-3 py-2.5 rounded-lg text-sm text-gray-500 hover:text-gray-900 hover:bg-gray-100 transition-colors"
         >
           <LogOut size={16} />
           Sign out

@@ -1,26 +1,22 @@
 import type { Metadata } from "next";
-import { Geist, Geist_Mono } from "next/font/google";
+import { Inter_Tight } from "next/font/google";
 import "./globals.css";
 
-const geistSans = Geist({
-  variable: "--font-geist-sans",
+const interTight = Inter_Tight({
+  variable: "--font-inter-tight",
   subsets: ["latin"],
-});
-
-const geistMono = Geist_Mono({
-  variable: "--font-geist-mono",
-  subsets: ["latin"],
+  weight: ["400", "500", "600", "700", "800"],
 });
 
 export const metadata: Metadata = {
-  title: "2.0 Collective | Your Career Data Infrastructure",
+  title: "2.0 Dash",
   description: "AI-guided advancement process that produces your personalized Ambition Profile — matching you to hyper-specific tools and resources for exactly where you are in your career.",
   keywords: ["career advancement", "ambition profile", "career inventory", "professional development"],
   openGraph: {
-    title: "2.0 Collective",
+    title: "2.0 Dash",
     description: "Your personal career data infrastructure.",
     url: "https://dash.the20.co",
-    siteName: "2.0 Collective",
+    siteName: "2.0 Dash",
     type: "website",
   },
 };
@@ -31,8 +27,8 @@ export default function RootLayout({
   children: React.ReactNode;
 }>) {
   return (
-    <html lang="en" className="dark">
-      <body className={`${geistSans.variable} ${geistMono.variable} antialiased bg-[#0A0A0A] text-[#FAFAFA] min-h-screen`}>
+    <html lang="en">
+      <body className={`${interTight.variable} antialiased bg-white text-gray-900 min-h-screen`}>
         {children}
       </body>
     </html>

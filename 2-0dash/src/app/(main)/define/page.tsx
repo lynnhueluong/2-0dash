@@ -24,9 +24,9 @@ export default async function DefinePage() {
 
   return (
     <div className="flex flex-col h-screen">
-      <div className="flex-shrink-0 px-6 py-4 border-b border-[#2A2A2A]">
+      <div className="flex-shrink-0 px-6 py-4 border-b border-gray-200">
         <h1 className="text-lg font-bold">Career Inventory</h1>
-        <p className="text-sm text-[#6B6B6B]">Let&apos;s map the full picture of your professional self.</p>
+        <p className="text-sm text-gray-500">Let&apos;s map the full picture of your professional self.</p>
       </div>
       <div className="flex-1 overflow-hidden">
         <StagePageClient

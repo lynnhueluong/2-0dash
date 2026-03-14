@@ -58,8 +58,8 @@ export function StagePageClient({
   if (isSaving) {
     return (
       <div className="h-full flex items-center justify-center flex-col gap-4">
-        <Loader2 size={32} className="animate-spin text-[#D4AF37]" />
-        <p className="text-[#6B6B6B] text-sm">Saving your progress...</p>
+        <Loader2 size={32} className="animate-spin text-blue-600" />
+        <p className="text-gray-500 text-sm">Saving your progress...</p>
       </div>
     )
   }
