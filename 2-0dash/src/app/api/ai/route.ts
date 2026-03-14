@@ -25,14 +25,19 @@ export async function POST(req: NextRequest) {
       return NextResponse.json({ error: 'Missing messages or stage' }, { status: 400 })
     }
 
-    // Save/update session in database
-    await supabase.from('sessions').upsert({
-      user_id: user.id,
-      stage,
-      conversation_history: messages as unknown as never,
-      progress_pct: calculateProgress(messages.length, stage),
-      last_active_at: new Date().toISOString(),
-    }, { onConflict: 'user_id,stage' })
+    // Save/update session in database (non-blocking — DB errors must not kill the AI response)
+    try {
+      const { error: dbError } = await supabase.from('sessions').upsert({
+        user_id: user.id,
+        stage,
+        conversation_history: messages as unknown as never,
+        progress_pct: calculateProgress(messages.length, stage),
+        last_active_at: new Date().toISOString(),
+      }, { onConflict: 'user_id,stage' })
+      if (dbError) console.error('[Sessions upsert error]', dbError)
+    } catch (dbErr) {
+      console.error('[Sessions upsert error]', dbErr)
+    }
 
     // Stream from Claude
     const aiStream = await streamAIResponse(messages, stage, profile)
