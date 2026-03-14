@@ -1,0 +1,80 @@
+export const dynamic = 'force-dynamic'
+
+import { NextRequest, NextResponse } from 'next/server'
+import { createServerSupabaseClient } from '@/lib/supabase-server'
+import { streamAIResponse } from '@/lib/ai'
+import type { AIRequestBody } from '@/lib/types'
+
+export const runtime = 'nodejs'
+export const maxDuration = 60
+
+export async function POST(req: NextRequest) {
+  try {
+    // Auth check
+    const supabase = await createServerSupabaseClient()
+    const { data: { user } } = await supabase.auth.getUser()
+    
+    if (!user) {
+      return NextResponse.json({ error: 'Unauthorized' }, { status: 401 })
+    }
+
+    const body: AIRequestBody = await req.json()
+    const { messages, stage, profile } = body
+
+    if (!messages || !stage) {
+      return NextResponse.json({ error: 'Missing messages or stage' }, { status: 400 })
+    }
+
+    // Save/update session in database
+    await supabase.from('sessions').upsert({
+      user_id: user.id,
+      stage,
+      conversation_history: messages as unknown as never,
+      progress_pct: calculateProgress(messages.length, stage),
+      last_active_at: new Date().toISOString(),
+    }, { onConflict: 'user_id,stage' })
+
+    // Stream from Claude
+    const aiStream = await streamAIResponse(messages, stage, profile)
+
+    const encoder = new TextEncoder()
+    const readableStream = new ReadableStream({
+      async start(controller) {
+        const reader = aiStream.getReader()
+        try {
+          while (true) {
+            const { done, value } = await reader.read()
+            if (done) {
+              controller.enqueue(encoder.encode('data: [DONE]\n\n'))
+              controller.close()
+              break
+            }
+            controller.enqueue(encoder.encode(`data: ${JSON.stringify({ text: value })}\n\n`))
+          }
+        } catch (err) {
+          controller.error(err)
+        }
+      }
+    })
+
+    return new Response(readableStream, {
+      headers: {
+        'Content-Type': 'text/event-stream',
+        'Cache-Control': 'no-cache',
+        'Connection': 'keep-alive',
+        'X-Accel-Buffering': 'no',
+      },
+    })
+  } catch (err) {
+    console.error('[AI Route Error]', err)
+    return NextResponse.json({ error: 'Internal server error' }, { status: 500 })
+  }
+}
+
+function calculateProgress(messageCount: number, stage: string): number {
+  const stageBase: Record<string, number> = { inventory: 0, roadmap: 33, narrative: 66 }
+  const base = stageBase[stage] || 0
+  // Each stage has roughly 12-15 exchanges max
+  const stageProgress = Math.min((messageCount / 14) * 33, 33)
+  return Math.round(base + stageProgress)
+}
