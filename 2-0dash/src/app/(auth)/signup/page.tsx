@@ -33,7 +33,7 @@ export default function SignupPage() {
       password,
       options: {
         data: { full_name: name, name, referral_source: referral },
-        emailRedirectTo: `${window.location.origin}/auth/callback`,
+        emailRedirectTo: `${window.location.origin}/auth/callback?next=%2Fdashboard`,
       },
     })
 
